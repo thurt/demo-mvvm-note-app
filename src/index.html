@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Note App</title>
+  <style type="text/css">
+    * {
+       margin: 0;
+       padding: 0;
+    }
+    html,
+    body {
+       height: 100%;
+    }
+    .hidden {
+      visibility: hidden;
+    }
+    #List {
+      display:inline-block;
+      padding: 0;
+    }
+    #List li {
+      cursor: pointer;
+      padding: 5px 20px 5px 20px;
+      outline: 1px solid gray;
+      list-style-type: none;
+    }
+    #List .open {
+      font-weight: bold;
+      background: red;
+    }
+    #Detail .dates {
+      float: right;
+    }
+  </style>
+</head>
+<body>
+  <div id="Content">
+    <div id="Toolbar">
+      <input type="button" data-name="new" value="New"/>
+      <input type="button" data-name="delete" value="Delete" disabled="true" />
+    </div>
+    <ul id="List">
+      <!-- <li> items -->
+    </ul>
+    <div id="Detail" class="hidden">
+      <div class="dates">
+        <p data-name="created"></p>
+        <p data-name="modified"></p>
+      </div>
+      <h2 data-name="title" contentEditable="true"></h2>
+      <hr>
+      <p data-name="body" contentEditable="true"></p>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

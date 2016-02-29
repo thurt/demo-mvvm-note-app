@@ -1,0 +1,19 @@
+{
+  "name": "demo-mvvm-note-app",
+  "version": "1.0.0",
+  "description": "A simple Note App",
+  "main": "dist/index.html",
+  "scripts": {
+    "html-inline": "cp src/index.html dist/_index.html && html-inline dist/_index.html -o dist/index.html && rm dist/_index.html",
+    "build": "browserify src/app.js -o dist/app.js --debug && npm run html-inline"
+  },
+  "author": "thurt",
+  "license": "ISC",
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "html-inline": "^1.2.0"
+  },
+  "dependencies": {
+    "view-model": "git+https://git@github.com/thurt/view-model.git"
+  }
+}
