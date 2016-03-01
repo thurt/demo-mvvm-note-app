@@ -1,17 +1,22 @@
 {
   "name": "demo-mvvm-note-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple Note App",
   "main": "dist/index.html",
   "scripts": {
-    "html-inline": "cp src/index.html dist/_index.html && html-inline dist/_index.html -o dist/index.html && rm dist/_index.html",
-    "build": "browserify src/app.js -o dist/app.js --debug && npm run html-inline"
+    "inline": "html-inline dist/_index.html -o dist/index.html",
+    "minify-html": "prettydiff lang:'html' mode:'minify' source:'src/index.html' > dist/_index.html",
+    "minify-js": "prettydiff lang:'javascript' mode:'minify' source:'dist/_app.js' > dist/app.js",
+    "browserify": "browserify src/app.js -o dist/_app.js",
+    "cleanup": "rm dist/_app.js dist/app.js dist/_index.html",
+    "build": "npm run browserify && npm run minify-js && npm run minify-html && npm run inline && npm run cleanup"
   },
   "author": "thurt",
   "license": "ISC",
   "devDependencies": {
     "browserify": "^13.0.0",
-    "html-inline": "^1.2.0"
+    "html-inline": "^1.2.0",
+    "prettydiff": "^1.16.22"
   },
   "dependencies": {
     "view-model": "git+https://git@github.com/thurt/view-model.git"
