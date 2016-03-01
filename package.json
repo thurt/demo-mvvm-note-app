@@ -19,6 +19,7 @@
     "prettydiff": "^1.16.22"
   },
   "dependencies": {
+    "storage-manager": "git+https://git@github.com/thurt/storage-manager.git",
     "view-model": "git+https://git@github.com/thurt/view-model.git"
   }
 }
