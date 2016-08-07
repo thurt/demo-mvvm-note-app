@@ -18,7 +18,7 @@ module.exports = function(myName, myModel) {
   }
 
   function _input(target) {
-    this.update(myKey, { [target.dataset.name]: target.textContent })
+    this.update(myKey, { [target.dataset.name]: target.innerHTML })
   }
 
   myView.addEventListener('input', input, true)
@@ -26,12 +26,16 @@ module.exports = function(myName, myModel) {
   app.add(myModel, {
     update_modified(key) {
       if (myKey !== key) return
-      myData['modified'].textContent = this.get(myKey, 'modified')
+      myData['modified'].textContent = 'Modified: ' + this.get(myKey, 'modified')
     },
     [myName+'set'](key) {
       myKey = key
       for (let name in myData) {
-        myData[name].textContent = this.get(myKey, name)
+        var value = this.get(myKey, name)
+        if (name === 'created' || name === 'modified') {
+          value = name.charAt(0).toUpperCase() + name.slice(1) + ': ' + value
+        }
+        myData[name].innerHTML = value
       }
 
       if (myView.classList.contains('hidden')) myView.classList.remove('hidden')

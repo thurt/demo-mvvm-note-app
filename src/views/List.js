@@ -21,36 +21,52 @@ module.exports = function(myToolbar, myDetail, myModel) {
   function open(target) {
     if (open_el) {
       if (open_el === target) return false // target is already open
-      open_el.classList.remove('open')
+      open_el.classList.remove('active')
     }
     open_el = target
-    open_el.classList.add('open')
+    open_el.classList.add('active')
     return true // opened target
+  }
+  
+  function checkForEmptyTitle(title) {
+    if (title === '') {
+      return '<Untitled>'
+    } else {
+      return title
+    }
   }
 
   myView.addEventListener('click', click, true)
 
   app.add(myModel, {
     new(key) {
-      var title = this.get(key, 'title')
-      var li = document.createElement('li')
-      li.textContent = title
-      myKeys.set(li, key)
-      myView.insertBefore(li, myView.childNodes[0])
+      var title = checkForEmptyTitle(this.get(key, 'title'))
+      var btn = document.createElement('button')
+      btn.textContent = title
+      btn.classList.add('btn')
+      btn.classList.add('btn-default')
+      myKeys.set(btn, key)
+      myView.insertBefore(btn, myView.childNodes[0])
 
       if (auto_open) {
         auto_open = false
-        _click.call(this, li)
+        _click.call(this, btn)
       }
     },
     update_title(key) {
-      open_el.innerText = this.get(key, 'title')
+      //open_el.innerText = this.get(key, 'title')
+      open_el.innerText = checkForEmptyTitle(this.get(key, 'title'))
     },
     delete(key) {
+      var next_sibling = open_el.nextElementSibling
       open_el.remove()
       open_el = null
-      this.emit(myToolbar+'disableButton', 'delete')
-      this.emit(myDetail+'clear')
+      if (next_sibling === null) {
+        this.emit(myToolbar+'disableButton', 'delete')
+        this.emit(myDetail+'clear')
+      } else {
+        app.run(myModel, _click, next_sibling)
+      }
     },
     [myToolbar+'delete']() {
       this.delete(myKeys.get(open_el))
@@ -63,6 +79,16 @@ module.exports = function(myToolbar, myDetail, myModel) {
 
   // Fill List with existing items
   app.run(myModel, function() {
-    this.getKeys().forEach(key => this.emit('new', key))
+    this.getKeys()
+      .sort((a, b) => { // sort by created date descending
+        var a_created = Date.parse(this.get(a, 'created'))
+        var b_created = Date.parse(this.get(b, 'created'))
+        if (a_created > b_created) {
+          return true
+        } else {
+          return false
+        }
+      })
+      .forEach(key => this.emit('new', key))
   })
 }

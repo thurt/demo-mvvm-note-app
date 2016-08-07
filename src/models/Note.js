@@ -10,8 +10,8 @@ module.exports = function() {
   for (let key in NOTES) NOTES[key] = JSON.parse(NOTES[key])
 
   const blank = {
-    title: 'New ' + myName,
-    body: 'Enter some body text here',
+    title: '',
+    body: '',
     created: null,
     modified: null
   }

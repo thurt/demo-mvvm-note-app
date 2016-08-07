@@ -4,56 +4,93 @@
   <meta charset="utf-8">
   <title>Note App</title>
   <style type="text/css">
-    * {
-       margin: 0;
-       padding: 0;
-    }
-    html,
-    body {
-       height: 100%;
-    }
     .hidden {
       visibility: hidden;
     }
     #List {
-      display:inline-block;
-      padding: 0;
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 10px;
     }
-    #List li {
-      cursor: pointer;
-      padding: 5px 20px 5px 20px;
-      outline: 1px solid gray;
-      list-style-type: none;
+    #List .btn {
+      text-align: left;
+      white-space: normal;
     }
-    #List .open {
-      font-weight: bold;
-      background: red;
+    #Title {
+      border-bottom: 1px solid #adadad;
+      
+      margin-bottom: 20px;
     }
-    #Detail .dates {
-      float: right;
+    .dates p {
+      margin: 0;
+      font-size: x-small;
+      font-style: italic;
+    }
+    [contentEditable]:hover {
+      cursor: text;
+    }
+    [contentEditable]:empty:before {
+      content: attr(placeholder);
+      color: #adadad;
+      font-style: italic;
+    }
+    [contentEditable]:active,
+    [contentEditable]:focus{
+      border:none;
+      outline:none;
+    }
+    [contentEditable]:empty:focus:before {
+      content: "";
+      font-style: normal;
+    }
+    [data-name=body] {
+      font-size: 14pt;
     }
   </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+  <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 </head>
 <body>
-  <div id="Content">
-    <div id="Toolbar">
-      <input type="button" data-name="new" value="New"/>
-      <input type="button" data-name="delete" value="Delete" disabled="true" />
-    </div>
-    <ul id="List">
-      <!-- <li> items -->
-    </ul>
-    <div id="Detail" class="hidden">
-      <div class="dates">
-        <p data-name="created"></p>
-        <p data-name="modified"></p>
+  <div class="container-fluid">
+    <div id="Content" class="row">
+      <div class="col-xs-3 col-md-3" style="padding:5px">
+        <div id="Toolbar">
+          <input type="button" class="btn btn-primary btn-md btn-block" data-name="new" value="New"/>
+          <input type="button" class="btn btn-primary btn-md btn-block" data-name="delete" value="Delete" disabled="true" />
+        </div>
+        <div class="btn-group-vertical" id="List" role="group"></div>
       </div>
-      <h2 data-name="title" contentEditable="true"></h2>
-      <hr>
-      <p data-name="body" contentEditable="true"></p>
+      <div class="col-xs-9 col-md-9">
+        <div id="Detail" class="hidden" >
+          <div id="Title">
+            <div class="title">
+              <h2 data-name="title" placeholder="Add a title" contentEditable></h2>
+            </div>
+            <div class="dates">
+              <p data-name="created"></p>
+              <p data-name="modified"></p>
+            </div>
+          </div>
+          <p data-name="body" placeholder="Add some body text here" contentEditable></p>
+        </div>
+      </div>
     </div>
   </div>
 
   <script src="./app.js"></script>
+  <script>
+    /* global jQuery */
+    jQuery(function($){
+      $(document.querySelectorAll('[contentEditable]')).focusout(function(){
+        var element = $(this);        
+        if (!element.text().replace(" ", "").length) {
+          element.empty();
+        }
+      });
+    });
+  </script>
 </body>
 </html>
