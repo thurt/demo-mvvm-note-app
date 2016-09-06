@@ -4,45 +4,142 @@
   <meta charset="utf-8">
   <title>Note App</title>
   <style type="text/css">
-    .hidden {
-      visibility: hidden;
+  .hidden {
+    display: none;
+  }
+  #List {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  #List .btn {
+    text-align: left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  #Title {
+    border-bottom: 1px solid #adadad;
+    margin-bottom: 20px;
+  }
+  .dates p {
+    margin: 0;
+    font-size: x-small;
+    font-style: italic;
+  }
+  [contenteditable] {
+    cursor: text;
+  }
+  [contenteditable]:empty:before {
+    content: attr(placeholder);
+    color: LightGray;
+    font-style: italic;
+  }
+  [contenteditable]:active,
+  [contenteditable]:focus{
+    border:none;
+    outline:none;
+  }
+  [data-name=body] {
+    font-size: 14pt;
+  }
+
+  #Empty {
+    color: LightGray;
+    font-size: larger;
+    font-style: italic;
+    text-align: center;
+  }
+
+  /*!
+  * Start Bootstrap - Simple Sidebar (http://startbootstrap.com/)
+  * Copyright 2013-2016 Start Bootstrap
+  * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap/blob/gh-pages/LICENSE)
+  */
+
+  /*
+  *  Modifications:
+  *    Removed .sidebar-nav and .sidebar-brand rules
+  *    Removed background rule for #sidebar-wrapper
+  *    Added #menu-toggle font-size: larger
+  */
+
+  body {
+    overflow-x: hidden;
+  }
+
+  #menu-toggle {
+    font-size: larger;
+  }
+
+  #wrapper {
+    padding-left: 0;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+  }
+
+  #wrapper.toggled {
+    padding-left: 250px;
+  }
+
+  #sidebar-wrapper {
+    z-index: 1000;
+    position: fixed;
+    left: 250px;
+    width: 0;
+    height: 100%;
+    margin-left: -250px;
+    overflow-y: auto;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+  }
+
+  #wrapper.toggled #sidebar-wrapper {
+    width: 250px;
+  }
+
+  #page-content-wrapper {
+    width: 100%;
+    position: absolute;
+    padding: 15px;
+  }
+
+  #wrapper.toggled #page-content-wrapper {
+    position: absolute;
+    margin-right: -250px;
+  }
+
+  @media(min-width:768px) {
+    #wrapper {
+      padding-left: 250px;
     }
-    #List {
-      width: 100%;
-      margin-top: 10px;
-      margin-bottom: 10px;
+
+    #wrapper.toggled {
+      padding-left: 0;
     }
-    #List .btn {
-      text-align: left;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
+
+    #sidebar-wrapper {
+      width: 250px;
     }
-    #Title {
-      border-bottom: 1px solid #adadad;
-      margin-bottom: 20px;
+
+    #wrapper.toggled #sidebar-wrapper {
+      width: 0;
     }
-    .dates p {
-      margin: 0;
-      font-size: x-small;
-      font-style: italic;
+
+    #page-content-wrapper {
+      padding: 20px;
+      position: relative;
     }
-    [contenteditable] {
-      cursor: text;
+
+    #wrapper.toggled #page-content-wrapper {
+      position: relative;
+      margin-right: 0;
     }
-    [contenteditable]:empty:before {
-      content: attr(placeholder);
-      color: #adadad;
-      font-style: italic;
-    }
-    [contenteditable]:active,
-    [contenteditable]:focus{
-      border:none;
-      outline:none;
-    }
-    [data-name=body] {
-      font-size: 14pt;
-    }
+  }
   </style>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -51,32 +148,52 @@
   <script src="../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 </head>
 <body>
-  <div class="container-fluid">
-    <div id="Content" class="row">
-      <div class="col-xs-3 col-md-3" style="padding:5px">
-        <div id="Toolbar">
-          <input type="button" class="btn btn-primary btn-md btn-block" data-name="new" value="New"/>
-          <input type="button" class="btn btn-primary btn-md btn-block" data-name="delete" value="Delete" disabled="true" />
-        </div>
-        <div class="btn-group-vertical" id="List" role="group"></div>
+  <div id="wrapper">
+
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+      <div id="Toolbar">
+        <input type="button" class="btn btn-primary btn-md btn-block" data-name="new" value="New"/>
+        <input type="button" class="btn btn-primary btn-md btn-block" data-name="delete" value="Delete" disabled="true" />
       </div>
-      <div class="col-xs-9 col-md-9">
-        <div id="Detail" class="hidden">
-          <div id="Title">
-            <div class="title">
-              <h2 data-name="title" placeholder="Add a title" contenteditable="true"></h2>
+      <div class="btn-group-vertical" id="List" role="group"></div>
+    </div>
+    <!-- /#sidebar-wrapper -->
+    <div id="page-content-wrapper">
+        <div id="Content" class="row">
+          <div class="container-fluid">
+            <input type="button" class="btn btn-default" id="menu-toggle" value="&#x2261;" />
+            <div id="Detail" class="hidden">
+              <div id="Title">
+                <div class="title">
+                  <h2 data-name="title" placeholder="Add a title" contenteditable="true"></h2>
+                </div>
+                <div class="dates">
+                  <p data-name="created"></p>
+                  <p data-name="modified"></p>
+                </div>
+              </div>
+              <p data-name="body" placeholder="Add some body text here" contenteditable="true"></p>
             </div>
-            <div class="dates">
-              <p data-name="created"></p>
-              <p data-name="modified"></p>
+            <div id="Empty" class="container-fluid">
+              <span style="font-size: xx-large;">&#x2606;</span><br>
+              You don't have any notes open.<br><br>
+              Use the menu to create a new note<br>
+              or open an existing note.
             </div>
           </div>
-          <p data-name="body" placeholder="Add some body text here" contenteditable="true"></p>
-        </div>
       </div>
     </div>
+    <!-- /#page-content-wrapper -->
   </div>
-
+  <!-- /#wrapper -->
   <script src="./app.js"></script>
+  <script>
+  // Menu Toggle Script
+  $("#menu-toggle").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
+  });
+  </script>
 </body>
 </html>

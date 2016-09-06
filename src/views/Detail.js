@@ -4,6 +4,8 @@ var app = require('../app')
 module.exports = function(myName, myModel) {
   const myView = document.getElementById('Detail')
   const myData = Object.create(null)
+  const myEmpty = document.getElementById('Empty')
+
   // fill myData
   for (let i = 0, els = myView.querySelectorAll('[data-name]'); i < els.length; i++) {
     let e = els[i]
@@ -59,11 +61,15 @@ module.exports = function(myName, myModel) {
         myData[name].innerHTML = value
       }
 
-      if (myView.classList.contains('hidden')) myView.classList.remove('hidden')
+      if (myView.classList.contains('hidden')) {
+        myView.classList.remove('hidden')
+        myEmpty.classList.add('hidden')
+      }
     },
     [myName+'clear']() {
       if (myView.classList.contains('hidden')) return
       myView.classList.add('hidden')
+      myEmpty.classList.remove('hidden')
       myKey = null
       clearSelections()
     }
