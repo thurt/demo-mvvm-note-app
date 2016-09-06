@@ -18,10 +18,30 @@ module.exports = function(myName, myModel) {
   }
 
   function _input(target) {
-    this.update(myKey, { [target.dataset.name]: target.innerHTML })
+    switch (target.dataset.name) {
+      case 'title':
+        this.update(myKey, { [target.dataset.name]: target.innerText })
+        break
+      case 'body':
+        this.update(myKey, { [target.dataset.name]: target.innerHTML })
+        break
+      default:
+        console.warn(myName, ': this view-model does not recognize dataset name', target.dataset.name)
+        break
+    }
   }
 
   myView.addEventListener('input', input, true)
+  myData['title'].addEventListener('keydown', function(e) {
+    if (e.keyCode === 13) { // enter
+      e.preventDefault()
+    }
+  })
+
+  function clearSelections() {
+    Object.keys(myData).forEach(key => myData[key].blur())
+    window.getSelection().removeAllRanges()
+  }
 
   app.add(myModel, {
     update_modified(key) {
@@ -29,6 +49,7 @@ module.exports = function(myName, myModel) {
       myData['modified'].textContent = 'Modified: ' + this.get(myKey, 'modified')
     },
     [myName+'set'](key) {
+      clearSelections()
       myKey = key
       for (let name in myData) {
         var value = this.get(myKey, name)
@@ -44,6 +65,7 @@ module.exports = function(myName, myModel) {
       if (myView.classList.contains('hidden')) return
       myView.classList.add('hidden')
       myKey = null
+      clearSelections()
     }
   })
 }

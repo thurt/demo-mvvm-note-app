@@ -5,10 +5,8 @@ module.exports = function(myName, myModel) {
   const myView = document.getElementById('Toolbar')
   const myData = Object.create(null)
   // fill myData
-  {
-    let els = myView.querySelectorAll('[data-name]')
-    for (let i = 0; i < els.length; i++)
-      myData[els[i].dataset.name] = els[i]
+  for (let i = 0, els = myView.querySelectorAll('[data-name]'); i < els.length; i++) {
+    myData[els[i].dataset.name] = els[i]
   }
 
   function click(e) {

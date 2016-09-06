@@ -27,7 +27,7 @@ module.exports = function(myToolbar, myDetail, myModel) {
     open_el.classList.add('active')
     return true // opened target
   }
-  
+
   function checkForEmptyTitle(title) {
     if (title === '') {
       return '<Untitled>'
@@ -43,6 +43,7 @@ module.exports = function(myToolbar, myDetail, myModel) {
       var title = checkForEmptyTitle(this.get(key, 'title'))
       var btn = document.createElement('button')
       btn.textContent = title
+      btn.setAttribute('title', title)
       btn.classList.add('btn')
       btn.classList.add('btn-default')
       myKeys.set(btn, key)
@@ -54,8 +55,9 @@ module.exports = function(myToolbar, myDetail, myModel) {
       }
     },
     update_title(key) {
-      //open_el.innerText = this.get(key, 'title')
-      open_el.innerText = checkForEmptyTitle(this.get(key, 'title'))
+      var title = checkForEmptyTitle(this.get(key, 'title'))
+      open_el.innerText = title
+      open_el.setAttribute('title', title)
     },
     delete(key) {
       var next_sibling = open_el.nextElementSibling

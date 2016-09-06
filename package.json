@@ -17,7 +17,7 @@
   "devDependencies": {
     "browserify": "^13.0.0",
     "html-inline": "^1.2.0",
-    "prettydiff": "^1.16.22",
+    "prettydiff": "git+https://git@github.com/prettydiff/prettydiff.git#v2.1.8",
     "watch": "^0.19.1"
   },
   "dependencies": {
