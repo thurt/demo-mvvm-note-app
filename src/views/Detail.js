@@ -1,7 +1,6 @@
-'use strict'
 const app = require('../app')
 
-module.exports = function(myName, myModel) {
+module.exports = function(myName, myModel, app) {
   const myView = document.getElementById('Detail')
   const myData = Object.create(null)
   const myEmpty = document.getElementById('Empty')
