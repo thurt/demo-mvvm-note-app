@@ -1,5 +1,5 @@
 'use strict'
-var app = require('../app')
+const app = require('../app')
 
 module.exports = function() {
   const myName = 'Note'
@@ -18,8 +18,8 @@ module.exports = function() {
 
   app.create(myName, {
     new() {
-      var key = generateUUID()
-      blank.created = blank.modified = Date().toString()
+      const key = generateUUID()
+      blank.created = blank.modified = new Date().toString()
 
       STORE.set(key, blank)
       NOTES[key] = Object.assign({}, blank)
@@ -27,9 +27,9 @@ module.exports = function() {
       this.emit('new', key)
     },
     get(key, prop) {
-      var nk = NOTES[key]
+      const nk = NOTES[key]
       if (nk === undefined) return console.warn(this.name, 'key', key, 'does not exist')
-      var nkp = nk[prop]
+      const nkp = nk[prop]
       if (nkp === undefined) return console.warn(this.name, 'property', prop, 'for key', key, 'does not exist')
       if (typeof nkp === 'object' && nkp !== null) return console.warn(this.name, 'property', prop, 'for key', key, 'is an object. Only primitives can be accessed.')
 
@@ -39,8 +39,8 @@ module.exports = function() {
       return Object.keys(NOTES)
     },
     update(key, obj) {
-      var changed = false
-      var nk = NOTES[key]
+      let changed = false
+      const nk = NOTES[key]
       if (nk === undefined) return console.warn(this.name, 'key', key, 'does not exist')
       for (let prop in obj) {
         let nkp = nk[prop]

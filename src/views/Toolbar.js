@@ -1,5 +1,5 @@
 'use strict'
-var app = require('../app')
+const app = require('../app')
 
 module.exports = function(myName, myModel) {
   const myView = document.getElementById('Toolbar')
@@ -15,7 +15,7 @@ module.exports = function(myName, myModel) {
   }
 
   function _click(target) {
-    var name = target.dataset.name
+    const name = target.dataset.name
     if (name !== 'delete') return this.emit(myName+name)
     if (window.confirm(`Are you sure you want to delete this ${myModel} ?`)) {
       this.emit(myName+name)
@@ -26,12 +26,12 @@ module.exports = function(myName, myModel) {
 
   app.add(myModel, {
     [myName+'disableButton'](btn_name) {
-      var btn = myData[btn_name]
+      const btn = myData[btn_name]
       if (btn !== undefined) btn.disabled = true
       else console.warn('Cannot find button by name', btn_name)
     },
     [myName+'enableButton'](btn_name) {
-      var btn = myData[btn_name]
+      const btn = myData[btn_name]
       if (btn !== undefined) btn.disabled = false
       else console.warn('Cannot find button by name', btn_name)
     }

@@ -1,5 +1,5 @@
 'use strict'
-var app = require('view-model')(true)
+const app = require('view-model')(true)
 module.exports = app
 
 let toolbar_name = 'toolbar_'

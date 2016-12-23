@@ -1,5 +1,5 @@
 'use strict'
-var app = require('../app')
+const app = require('../app')
 
 module.exports = function(myName, myModel) {
   const myView = document.getElementById('Detail')
@@ -12,7 +12,7 @@ module.exports = function(myName, myModel) {
     myData[e.dataset.name] = e
   }
 
-  var myKey = null
+  let myKey = null
 
   function input(e) {
     e.stopPropagation()
@@ -54,7 +54,7 @@ module.exports = function(myName, myModel) {
       clearSelections()
       myKey = key
       for (let name in myData) {
-        var value = this.get(myKey, name)
+        let value = this.get(myKey, name)
         if (name === 'created' || name === 'modified') {
           value = name.charAt(0).toUpperCase() + name.slice(1) + ': ' + value
         }

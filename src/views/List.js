@@ -1,12 +1,12 @@
 'use strict'
-var app = require('../app')
+const app = require('../app')
 
 module.exports = function(myToolbar, myDetail, myModel) {
   const myView = document.getElementById('List')
   const myKeys = new WeakMap()
 
-  var open_el = null
-  var auto_open = false
+  let open_el = null
+  let auto_open = false
 
   function click(e) {
     e.stopPropagation()
@@ -40,8 +40,8 @@ module.exports = function(myToolbar, myDetail, myModel) {
 
   app.add(myModel, {
     new(key) {
-      var title = checkForEmptyTitle(this.get(key, 'title'))
-      var btn = document.createElement('button')
+      const title = checkForEmptyTitle(this.get(key, 'title'))
+      const btn = document.createElement('button')
       btn.textContent = title
       btn.setAttribute('title', title)
       btn.classList.add('btn')
@@ -55,12 +55,12 @@ module.exports = function(myToolbar, myDetail, myModel) {
       }
     },
     update_title(key) {
-      var title = checkForEmptyTitle(this.get(key, 'title'))
+      const title = checkForEmptyTitle(this.get(key, 'title'))
       open_el.innerText = title
       open_el.setAttribute('title', title)
     },
     delete(key) {
-      var next_sibling = open_el.nextElementSibling
+      const next_sibling = open_el.nextElementSibling
       open_el.remove()
       open_el = null
       if (next_sibling === null) {
@@ -83,13 +83,9 @@ module.exports = function(myToolbar, myDetail, myModel) {
   app.run(myModel, function() {
     this.getKeys()
       .sort((a, b) => { // sort by created date descending
-        var a_created = Date.parse(this.get(a, 'created'))
-        var b_created = Date.parse(this.get(b, 'created'))
-        if (a_created > b_created) {
-          return true
-        } else {
-          return false
-        }
+        const a_created = Date.parse(this.get(a, 'created'))
+        const b_created = Date.parse(this.get(b, 'created'))
+        return (a_created > b_created)
       })
       .forEach(key => this.emit('new', key))
   })
