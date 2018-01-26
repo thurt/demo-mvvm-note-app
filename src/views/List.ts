@@ -1,23 +1,28 @@
-const app = require('../app');
+import ViewModel = require('view-model');
 
-module.exports = function(myToolbar, myDetail, myModel) {
+export default function List(
+  myToolbar: string,
+  myDetail: string,
+  myModel: string,
+  app: ViewModel.Interface,
+) {
   const myView = document.getElementById('List');
   const myKeys = new WeakMap();
 
-  let open_el = null;
+  let open_el: HTMLElement = null;
   let auto_open = false;
 
-  function click(e) {
+  function click(e: Event) {
     e.stopPropagation();
     app.run(myModel, _click, e.target);
   }
-  function _click(target) {
+  function _click(target: HTMLElement) {
     if (!open(target)) return;
 
     this.emit(myToolbar + 'enableButton', 'delete');
     this.emit(myDetail + 'set', myKeys.get(open_el));
   }
-  function open(target) {
+  function open(target: HTMLElement) {
     if (open_el) {
       if (open_el === target) return false; // target is already open
       open_el.classList.remove('active');
@@ -27,7 +32,7 @@ module.exports = function(myToolbar, myDetail, myModel) {
     return true; // opened target
   }
 
-  function checkForEmptyTitle(title) {
+  function checkForEmptyTitle(title: string) {
     if (title === '') {
       return '<Untitled>';
     } else {
@@ -81,12 +86,12 @@ module.exports = function(myToolbar, myDetail, myModel) {
   // Fill List with existing items
   app.run(myModel, function() {
     this.getKeys()
-      .sort((a, b) => {
+      .sort((a: string, b: string) => {
         // sort by created date descending
         const a_created = Date.parse(this.get(a, 'created'));
         const b_created = Date.parse(this.get(b, 'created'));
         return a_created > b_created;
       })
-      .forEach(key => this.emit('new', key));
+      .forEach((key: string) => this.emit('new', key));
   });
-};
+}

@@ -1,14 +1,27 @@
-const app = require('../app');
+import * as store from 'storage-manager';
+import generateUUID = require('../lib/generateUUID');
+import ViewModel = require('view-model');
 
-module.exports = function() {
+const STORE = store('localStorage');
+
+type Note = {
+  [prop: string]: string;
+  title: string;
+  body: string;
+  created: string;
+  modified: string;
+};
+
+export default function Note(app: ViewModel.Interface): string {
   const myName = 'Note';
-  const STORE = require('storage-manager')('localStorage');
-  const generateUUID = require('../lib/generateUUID');
 
-  const NOTES = STORE.getAll();
-  for (let key in NOTES) NOTES[key] = JSON.parse(NOTES[key]);
+  const NOTES: {[key: string]: Note} = {};
+  {
+    const _NOTES = STORE.getAll();
+    for (let key in _NOTES) NOTES[key] = JSON.parse(_NOTES[key]);
+  }
 
-  const blank = {
+  const blank: Note = {
     title: '',
     body: '',
     created: null,
@@ -92,4 +105,4 @@ module.exports = function() {
   });
 
   return myName;
-};
+}

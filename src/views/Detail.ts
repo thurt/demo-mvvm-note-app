@@ -1,13 +1,18 @@
-const app = require('../app');
+import ViewModel = require('view-model');
 
-module.exports = function(myName, myModel, app) {
+export default function Detail(
+  myName: string,
+  myModel: string,
+  app: ViewModel.Interface,
+) {
   const myView = document.getElementById('Detail');
   const myData = Object.create(null);
   const myEmpty = document.getElementById('Empty');
 
   // fill myData
   for (
-    let i = 0, els = myView.querySelectorAll('[data-name]');
+    let i = 0,
+      els: NodeListOf<HTMLElement> = myView.querySelectorAll('[data-name]');
     i < els.length;
     i++
   ) {
@@ -15,14 +20,14 @@ module.exports = function(myName, myModel, app) {
     myData[e.dataset.name] = e;
   }
 
-  let myKey = null;
+  let myKey: string = null;
 
-  function input(e) {
+  function input(e: Event) {
     e.stopPropagation();
     app.run(myModel, _input, e.target);
   }
 
-  function _input(target) {
+  function _input(target: HTMLElement) {
     switch (target.dataset.name) {
       case 'title':
         this.update(myKey, {[target.dataset.name]: target.innerText});
@@ -41,7 +46,7 @@ module.exports = function(myName, myModel, app) {
   }
 
   myView.addEventListener('input', input, true);
-  myData['title'].addEventListener('keydown', function(e) {
+  myData['title'].addEventListener('keydown', function(e: KeyboardEvent) {
     if (e.keyCode === 13) {
       // enter
       e.preventDefault();
@@ -83,4 +88,4 @@ module.exports = function(myName, myModel, app) {
       clearSelections();
     },
   });
-};
+}

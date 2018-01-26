@@ -4,26 +4,20 @@
   "description": "A simple Note App",
   "main": "dist/index.html",
   "scripts": {
-    "inline": "html-inline -i dist/_index.html -o dist/index.html",
-    "minify-html": "prettydiff lang:'html' mode:'minify' source:'src/index.html' > dist/_index.html",
-    "minify-js": "prettydiff lang:'javascript' mode:'minify' source:'dist/_app.js' > dist/app.js",
-    "browserify": "browserify src/app.js -o dist/_app.js",
-    "cleanup": "rm dist/_app.js dist/app.js dist/_index.html",
-    "build": "npm run browserify && npm run minify-js && npm run minify-html && npm run inline && npm run cleanup",
-    "watch:build": "watch 'npm run build' ./src --wait=10"
+    "minify-html": "prettydiff lang:'html' mode:'minify' source:'src/index.html' > dist/index.html",
+    "build": "webpack && npm run minify-html"
   },
   "author": "thurt",
   "license": "ISC",
   "devDependencies": {
-    "browserify": "^13.0.0",
-    "html-inline": "^1.2.0",
-    "prettydiff": "git+https://git@github.com/prettydiff/prettydiff.git#v2.1.8",
-    "watch": "^0.19.1"
+    "awesome-typescript-loader": "^3.4.1",
+    "prettydiff": "github:prettydiff/prettydiff#v2.1.8",
+    "source-map-loader": "^0.2.3",
+    "typescript": "^2.6.2",
+    "webpack": "^3.10.0"
   },
   "dependencies": {
-    "bootstrap": "^3.3.7",
-    "jquery": "^3.1.0",
-    "storage-manager": "git+https://git@github.com/thurt/storage-manager.git#v1.1.1",
-    "view-model": "git+https://git@github.com/thurt/view-model.git#v1.0.4"
+    "storage-manager": "github:thurt/storage-manager",
+    "view-model": "github:thurt/view-model"
   }
 }
