@@ -665,8 +665,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const api = __webpack_require__(16);
 const ndjsonStream = __webpack_require__(54); // This file should be imported using the CommonJS-style
 exports.basePath = '/api';
-exports.posts = new api.PostsApi();
-exports.auth = new api.AuthApi();
+exports.posts = new api.PostsApi(undefined, exports.basePath);
+exports.auth = new api.AuthApi(undefined, exports.basePath);
 function streamRequest(path, cb, options) {
     return __awaiter(this, void 0, void 0, function* () {
         const r = yield fetch(path, options);
