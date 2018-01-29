@@ -4,6 +4,7 @@ import ViewModel = require('view-model');
 import {auth, posts, basePath, streamRequest} from '../api';
 import {CmsPost, CmsAccessToken, CmsUser} from 'cms-client-api';
 import debounce = require('debounce');
+import * as error from '../error';
 
 const STORE = Store('localStorage');
 
@@ -32,6 +33,9 @@ function fillUndefined(p: CmsPost): void {
   if (p.content === undefined) {
     p.content = '';
   }
+  if (p.published === undefined) {
+    p.published = false;
+  }
 }
 
 export default async function Note(app: ViewModel.Interface): Promise<string> {
@@ -54,7 +58,7 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
         POSTS[p.id] = p;
         this.emit('new', p.id);
       } catch (e) {
-        console.error(e);
+        error.Handle(e);
       }
     },
     get(key, prop) {
@@ -130,23 +134,23 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
             POSTS[id].last_edited = pu.last_edited;
             this.emit('update_modified', id);
           } catch (e) {
-            console.error(e);
+            error.Handle(e);
           }
         }
       },
-      5000,
+      3000,
       false,
     ),
     async delete(id) {
       try {
-        const pid = await posts.deletePost(
+        await posts.deletePost(
           {id},
           {headers: {Authorization: 'Bearer ' + access_token}},
         );
         delete POSTS[id];
         this.emit('delete', id);
       } catch (e) {
-        console.error(e);
+        error.Handle(e);
       }
     },
   });
@@ -173,7 +177,7 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
       {headers: {Authorization: 'Bearer ' + access_token}},
     );
   } catch (e) {
-    console.error(e);
+    error.Handle(e);
   }
 
   return myName;
