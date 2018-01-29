@@ -35,6 +35,11 @@ export default function Detail(
       case 'body':
         this.update(myKey, {[target.dataset.name]: target.innerHTML});
         break;
+      case 'published':
+        if (target instanceof HTMLInputElement) {
+          this.update(myKey, {[target.dataset.name]: target.checked});
+          break;
+        }
       default:
         console.warn(
           myName,
@@ -46,6 +51,8 @@ export default function Detail(
   }
 
   myView.addEventListener('input', input, true);
+  myView.addEventListener('click', input, true);
+
   myData['title'].addEventListener('keydown', function(e: KeyboardEvent) {
     if (e.keyCode === 13) {
       // enter
@@ -58,11 +65,19 @@ export default function Detail(
     window.getSelection().removeAllRanges();
   }
 
+  function setPublishedDisabledState(v: string) {
+    if (v === '') {
+      myData['published'].disabled = true;
+    } else {
+      myData['published'].disabled = false;
+    }
+  }
   app.add(myModel, {
     update_modified(key) {
       if (myKey !== key) return;
       myData['modified'].textContent =
         'Modified: ' + this.get(myKey, 'modified');
+      setPublishedDisabledState(this.get(myKey, 'title'));
     },
     [myName + 'set'](key) {
       clearSelections();
@@ -71,8 +86,13 @@ export default function Detail(
         let value = this.get(myKey, name);
         if (name === 'created' || name === 'modified') {
           value = name.charAt(0).toUpperCase() + name.slice(1) + ': ' + value;
+          myData[name].innerHTML = value;
+        } else if (name === 'published') {
+          myData[name].checked = value;
+          setPublishedDisabledState(this.get(myKey, 'title'));
+        } else {
+          myData[name].innerHTML = value;
         }
-        myData[name].innerHTML = value;
       }
 
       if (myView.classList.contains('hidden')) {
