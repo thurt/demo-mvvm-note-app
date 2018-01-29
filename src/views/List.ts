@@ -60,18 +60,43 @@ export default function List(
     },
     update_title(key) {
       const title = checkForEmptyTitle(this.get(key, 'title'));
-      open_el.innerText = title;
-      open_el.setAttribute('title', title);
+      const open_key = myKeys.get(open_el);
+
+      if (key === open_key) {
+        open_el.innerText = title;
+        open_el.setAttribute('title', title);
+      } else {
+        const els = Array.from(myView.children);
+        const el = els.find(el => myKeys.get(el) === key);
+        if (!el) return console.error('List could not find key ' + key);
+        if (!(el instanceof HTMLButtonElement)) {
+          return console.error(
+            'List requires element of key ' +
+              key +
+              ' to be instanceof HTMLButtonElement',
+          );
+        }
+        el.innerText = title;
+        el.setAttribute('title', title);
+      }
     },
     delete(key) {
-      const next_sibling = open_el.nextElementSibling;
-      open_el.remove();
-      open_el = null;
-      if (next_sibling === null) {
-        this.emit(myToolbar + 'disableButton', 'delete');
-        this.emit(myDetail + 'clear');
+      const open_key = myKeys.get(open_el);
+      if (key === open_key) {
+        const next_sibling = open_el.nextElementSibling;
+        open_el.remove();
+        open_el = null;
+        if (next_sibling === null) {
+          this.emit(myToolbar + 'disableButton', 'delete');
+          this.emit(myDetail + 'clear');
+        } else {
+          app.run(myModel, _click, next_sibling);
+        }
       } else {
-        app.run(myModel, _click, next_sibling);
+        const els = Array.from(myView.children);
+        const el = els.find(el => myKeys.get(el) === key);
+        if (!el) return console.error('List could not find key ' + key);
+        el.remove();
       }
     },
     [myToolbar + 'delete']() {
