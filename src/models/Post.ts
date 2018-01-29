@@ -133,7 +133,7 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
       Authorization: `Bearer ${access_token}`,
     });
     await streamRequest(
-      basePath + '/posts',
+      basePath + '/posts?includeUnPublished=true',
       (pc: PostChunk) => {
         const p = pc.result;
         POSTS[p.id] = p;

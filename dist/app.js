@@ -573,7 +573,7 @@ function Note(app) {
             headers = new Headers({
                 Authorization: `Bearer ${access_token}`,
             });
-            yield api_1.streamRequest(api_1.basePath + '/posts', (pc) => {
+            yield api_1.streamRequest(api_1.basePath + '/posts?includeUnPublished=true', (pc) => {
                 const p = pc.result;
                 POSTS[p.id] = p;
             }, { headers });
