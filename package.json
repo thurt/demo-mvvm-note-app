@@ -4,8 +4,7 @@
   "description": "A simple Note App",
   "main": "dist/index.html",
   "scripts": {
-    "minify-html":
-      "prettydiff lang:'html' mode:'minify' source:'src/app.html' > dist/app.html",
+    "minify-html": "prettydiff lang:'html' mode:'minify' source:'src/app.html' > dist/app.html",
     "build": "webpack && npm run minify-html"
   },
   "author": "thurt",
@@ -18,8 +17,10 @@
     "webpack": "^3.10.0"
   },
   "dependencies": {
+    "@types/debounce": "^1.0.0",
     "can-ndjson-stream": "^0.1.7",
     "cms-client-api": "github:thurt/cms-client-api",
+    "debounce": "^1.1.0",
     "storage-manager": "github:thurt/storage-manager",
     "view-model": "github:thurt/view-model"
   }
