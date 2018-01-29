@@ -171,9 +171,9 @@ module.exports = function (it) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const ViewModel = __webpack_require__(10);
 const Post_1 = __webpack_require__(13);
-const Toolbar_1 = __webpack_require__(56);
-const Detail_1 = __webpack_require__(57);
-const List_1 = __webpack_require__(58);
+const Toolbar_1 = __webpack_require__(58);
+const Detail_1 = __webpack_require__(59);
+const List_1 = __webpack_require__(60);
 const MyViewModel = ViewModel(true);
 let toolbar_name = 'toolbar_';
 let detail_name = 'detail_';
@@ -466,7 +466,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const Store = __webpack_require__(14);
 const api_1 = __webpack_require__(15);
-const debounce = __webpack_require__(59);
+const debounce = __webpack_require__(56);
+const error = __webpack_require__(57);
 const STORE = Store('localStorage');
 function convert(prop) {
     switch (prop) {
@@ -485,6 +486,9 @@ function fillUndefined(p) {
     if (p.content === undefined) {
         p.content = '';
     }
+    if (p.published === undefined) {
+        p.published = false;
+    }
 }
 function Note(app) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -502,7 +506,7 @@ function Note(app) {
                         this.emit('new', p.id);
                     }
                     catch (e) {
-                        console.error(e);
+                        error.Handle(e);
                     }
                 });
             },
@@ -552,20 +556,20 @@ function Note(app) {
                             this.emit('update_modified', id);
                         }
                         catch (e) {
-                            console.error(e);
+                            error.Handle(e);
                         }
                     }
                 });
-            }, 5000, false),
+            }, 3000, false),
             delete(id) {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
-                        const pid = yield api_1.posts.deletePost({ id }, { headers: { Authorization: 'Bearer ' + access_token } });
+                        yield api_1.posts.deletePost({ id }, { headers: { Authorization: 'Bearer ' + access_token } });
                         delete POSTS[id];
                         this.emit('delete', id);
                     }
                     catch (e) {
-                        console.error(e);
+                        error.Handle(e);
                     }
                 });
             },
@@ -590,7 +594,7 @@ function Note(app) {
             }, { headers: { Authorization: 'Bearer ' + access_token } });
         }
         catch (e) {
-            console.error(e);
+            error.Handle(e);
         }
         return myName;
     });
@@ -4564,229 +4568,6 @@ module.exports = {};
 
 /***/ }),
 /* 56 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function Toolbar(myName, myModel, app) {
-    const myView = document.getElementById('Toolbar');
-    const myData = Object.create(null);
-    // fill myData
-    for (let i = 0, els = myView.querySelectorAll('[data-name]'); i < els.length; i++) {
-        myData[els[i].dataset.name] = els[i];
-    }
-    function click(e) {
-        e.stopPropagation();
-        app.run(myModel, _click, e.target);
-    }
-    function _click(target) {
-        const name = target.dataset.name;
-        if (name !== 'delete')
-            return this.emit(myName + name);
-        if (window.confirm(`Are you sure you want to delete this ${myModel} ?`)) {
-            this.emit(myName + name);
-        }
-    }
-    myView.addEventListener('click', click, true);
-    app.add(myModel, {
-        [myName + 'disableButton'](btn_name) {
-            const btn = myData[btn_name];
-            if (btn !== undefined)
-                btn.disabled = true;
-            else
-                console.warn('Cannot find button by name', btn_name);
-        },
-        [myName + 'enableButton'](btn_name) {
-            const btn = myData[btn_name];
-            if (btn !== undefined)
-                btn.disabled = false;
-            else
-                console.warn('Cannot find button by name', btn_name);
-        },
-    });
-}
-exports.default = Toolbar;
-
-
-/***/ }),
-/* 57 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function Detail(myName, myModel, app) {
-    const myView = document.getElementById('Detail');
-    const myData = Object.create(null);
-    const myEmpty = document.getElementById('Empty');
-    // fill myData
-    for (let i = 0, els = myView.querySelectorAll('[data-name]'); i < els.length; i++) {
-        let e = els[i];
-        myData[e.dataset.name] = e;
-    }
-    let myKey = null;
-    function input(e) {
-        e.stopPropagation();
-        app.run(myModel, _input, e.target);
-    }
-    function _input(target) {
-        switch (target.dataset.name) {
-            case 'title':
-                this.update(myKey, { [target.dataset.name]: target.innerText });
-                break;
-            case 'body':
-                this.update(myKey, { [target.dataset.name]: target.innerHTML });
-                break;
-            default:
-                console.warn(myName, ': this view-model does not recognize dataset name', target.dataset.name);
-                break;
-        }
-    }
-    myView.addEventListener('input', input, true);
-    myData['title'].addEventListener('keydown', function (e) {
-        if (e.keyCode === 13) {
-            // enter
-            e.preventDefault();
-        }
-    });
-    function clearSelections() {
-        Object.keys(myData).forEach(key => myData[key].blur());
-        window.getSelection().removeAllRanges();
-    }
-    app.add(myModel, {
-        update_modified(key) {
-            if (myKey !== key)
-                return;
-            myData['modified'].textContent =
-                'Modified: ' + this.get(myKey, 'modified');
-        },
-        [myName + 'set'](key) {
-            clearSelections();
-            myKey = key;
-            for (let name in myData) {
-                let value = this.get(myKey, name);
-                if (name === 'created' || name === 'modified') {
-                    value = name.charAt(0).toUpperCase() + name.slice(1) + ': ' + value;
-                }
-                myData[name].innerHTML = value;
-            }
-            if (myView.classList.contains('hidden')) {
-                myView.classList.remove('hidden');
-                myEmpty.classList.add('hidden');
-            }
-        },
-        [myName + 'clear']() {
-            if (myView.classList.contains('hidden'))
-                return;
-            myView.classList.add('hidden');
-            myEmpty.classList.remove('hidden');
-            myKey = null;
-            clearSelections();
-        },
-    });
-}
-exports.default = Detail;
-
-
-/***/ }),
-/* 58 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function List(myToolbar, myDetail, myModel, app) {
-    const myView = document.getElementById('List');
-    const myKeys = new WeakMap();
-    let open_el = null;
-    let auto_open = false;
-    function click(e) {
-        e.stopPropagation();
-        app.run(myModel, _click, e.target);
-    }
-    function _click(target) {
-        if (!open(target))
-            return;
-        this.emit(myToolbar + 'enableButton', 'delete');
-        this.emit(myDetail + 'set', myKeys.get(open_el));
-    }
-    function open(target) {
-        if (open_el) {
-            if (open_el === target)
-                return false; // target is already open
-            open_el.classList.remove('active');
-        }
-        open_el = target;
-        open_el.classList.add('active');
-        return true; // opened target
-    }
-    function checkForEmptyTitle(title) {
-        if (title === '') {
-            return '<Untitled>';
-        }
-        else {
-            return title;
-        }
-    }
-    myView.addEventListener('click', click, true);
-    app.add(myModel, {
-        new(key) {
-            const title = checkForEmptyTitle(this.get(key, 'title'));
-            const btn = document.createElement('button');
-            btn.textContent = title;
-            btn.setAttribute('title', title);
-            btn.classList.add('btn');
-            btn.classList.add('btn-default');
-            myKeys.set(btn, key);
-            myView.insertBefore(btn, myView.childNodes[0]);
-            if (auto_open) {
-                auto_open = false;
-                _click.call(this, btn);
-            }
-        },
-        update_title(key) {
-            const title = checkForEmptyTitle(this.get(key, 'title'));
-            open_el.innerText = title;
-            open_el.setAttribute('title', title);
-        },
-        delete(key) {
-            const next_sibling = open_el.nextElementSibling;
-            open_el.remove();
-            open_el = null;
-            if (next_sibling === null) {
-                this.emit(myToolbar + 'disableButton', 'delete');
-                this.emit(myDetail + 'clear');
-            }
-            else {
-                app.run(myModel, _click, next_sibling);
-            }
-        },
-        [myToolbar + 'delete']() {
-            this.delete(myKeys.get(open_el));
-        },
-        [myToolbar + 'new']() {
-            auto_open = true;
-            this.new();
-        },
-    });
-    // Fill List with existing items
-    app.run(myModel, function () {
-        this.getKeys()
-            .sort((a, b) => {
-            // sort by created date descending
-            const a_created = Date.parse(this.get(a, 'created'));
-            const b_created = Date.parse(this.get(b, 'created'));
-            return a_created > b_created;
-        })
-            .forEach((key) => this.emit('new', key));
-    });
-}
-exports.default = List;
-
-
-/***/ }),
-/* 59 */
 /***/ (function(module, exports) {
 
 /**
@@ -4855,6 +4636,318 @@ module.exports = function debounce(func, wait, immediate){
 
   return debounced;
 };
+
+
+/***/ }),
+/* 57 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function Handle(e) {
+    if (e instanceof Error) {
+        console.error(e);
+        //@ts-ignore
+        window.top.Notify.addNotification({
+            title: 'Server Error',
+            message: 'Sorry, something went wrong when trying to communicate with the server. Please try again later.',
+            level: 'error',
+        });
+    }
+    if (e instanceof Response) {
+        e
+            .json()
+            .then((apie) => 
+        //@ts-ignore
+        window.top.Notify.addNotification({
+            title: e.statusText,
+            message: apie.error,
+            level: 'error',
+        }))
+            .catch(parsee => {
+            console.error(parsee);
+            //@ts-ignore
+            window.top.Notify.addNotification({
+                title: 'Server Error',
+                message: 'Sorry, something went wrong when trying to communicate with the server. Please try again later.',
+                level: 'error',
+            });
+        });
+    }
+}
+exports.Handle = Handle;
+
+
+/***/ }),
+/* 58 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function Toolbar(myName, myModel, app) {
+    const myView = document.getElementById('Toolbar');
+    const myData = Object.create(null);
+    // fill myData
+    for (let i = 0, els = myView.querySelectorAll('[data-name]'); i < els.length; i++) {
+        myData[els[i].dataset.name] = els[i];
+    }
+    function click(e) {
+        e.stopPropagation();
+        app.run(myModel, _click, e.target);
+    }
+    function _click(target) {
+        const name = target.dataset.name;
+        if (name !== 'delete')
+            return this.emit(myName + name);
+        if (window.confirm(`Are you sure you want to delete this ${myModel} ?`)) {
+            this.emit(myName + name);
+        }
+    }
+    myView.addEventListener('click', click, true);
+    app.add(myModel, {
+        [myName + 'disableButton'](btn_name) {
+            const btn = myData[btn_name];
+            if (btn !== undefined)
+                btn.disabled = true;
+            else
+                console.warn('Cannot find button by name', btn_name);
+        },
+        [myName + 'enableButton'](btn_name) {
+            const btn = myData[btn_name];
+            if (btn !== undefined)
+                btn.disabled = false;
+            else
+                console.warn('Cannot find button by name', btn_name);
+        },
+    });
+}
+exports.default = Toolbar;
+
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function Detail(myName, myModel, app) {
+    const myView = document.getElementById('Detail');
+    const myData = Object.create(null);
+    const myEmpty = document.getElementById('Empty');
+    // fill myData
+    for (let i = 0, els = myView.querySelectorAll('[data-name]'); i < els.length; i++) {
+        let e = els[i];
+        myData[e.dataset.name] = e;
+    }
+    let myKey = null;
+    function input(e) {
+        e.stopPropagation();
+        app.run(myModel, _input, e.target);
+    }
+    function _input(target) {
+        switch (target.dataset.name) {
+            case 'title':
+                this.update(myKey, { [target.dataset.name]: target.innerText });
+                break;
+            case 'body':
+                this.update(myKey, { [target.dataset.name]: target.innerHTML });
+                break;
+            case 'published':
+                if (target instanceof HTMLInputElement) {
+                    this.update(myKey, { [target.dataset.name]: target.checked });
+                    break;
+                }
+            default:
+                console.warn(myName, ': this view-model does not recognize dataset name', target.dataset.name);
+                break;
+        }
+    }
+    myView.addEventListener('input', input, true);
+    myView.addEventListener('click', input, true);
+    myData['title'].addEventListener('keydown', function (e) {
+        if (e.keyCode === 13) {
+            // enter
+            e.preventDefault();
+        }
+    });
+    function clearSelections() {
+        Object.keys(myData).forEach(key => myData[key].blur());
+        window.getSelection().removeAllRanges();
+    }
+    function setPublishedDisabledState(v) {
+        if (v === '') {
+            myData['published'].disabled = true;
+        }
+        else {
+            myData['published'].disabled = false;
+        }
+    }
+    app.add(myModel, {
+        update_modified(key) {
+            if (myKey !== key)
+                return;
+            myData['modified'].textContent =
+                'Modified: ' + this.get(myKey, 'modified');
+            setPublishedDisabledState(this.get(myKey, 'title'));
+        },
+        [myName + 'set'](key) {
+            clearSelections();
+            myKey = key;
+            for (let name in myData) {
+                let value = this.get(myKey, name);
+                if (name === 'created' || name === 'modified') {
+                    value = name.charAt(0).toUpperCase() + name.slice(1) + ': ' + value;
+                    myData[name].innerHTML = value;
+                }
+                else if (name === 'published') {
+                    myData[name].checked = value;
+                    setPublishedDisabledState(this.get(myKey, 'title'));
+                }
+                else {
+                    myData[name].innerHTML = value;
+                }
+            }
+            if (myView.classList.contains('hidden')) {
+                myView.classList.remove('hidden');
+                myEmpty.classList.add('hidden');
+            }
+        },
+        [myName + 'clear']() {
+            if (myView.classList.contains('hidden'))
+                return;
+            myView.classList.add('hidden');
+            myEmpty.classList.remove('hidden');
+            myKey = null;
+            clearSelections();
+        },
+    });
+}
+exports.default = Detail;
+
+
+/***/ }),
+/* 60 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function List(myToolbar, myDetail, myModel, app) {
+    const myView = document.getElementById('List');
+    const myKeys = new WeakMap();
+    let open_el = null;
+    let auto_open = false;
+    function click(e) {
+        e.stopPropagation();
+        app.run(myModel, _click, e.target);
+    }
+    function _click(target) {
+        if (!open(target))
+            return;
+        this.emit(myToolbar + 'enableButton', 'delete');
+        this.emit(myDetail + 'set', myKeys.get(open_el));
+    }
+    function open(target) {
+        if (open_el) {
+            if (open_el === target)
+                return false; // target is already open
+            open_el.classList.remove('active');
+        }
+        open_el = target;
+        open_el.classList.add('active');
+        return true; // opened target
+    }
+    function checkForEmptyTitle(title) {
+        if (title === '') {
+            return '<Untitled>';
+        }
+        else {
+            return title;
+        }
+    }
+    myView.addEventListener('click', click, true);
+    app.add(myModel, {
+        new(key) {
+            const title = checkForEmptyTitle(this.get(key, 'title'));
+            const btn = document.createElement('button');
+            btn.textContent = title;
+            btn.setAttribute('title', title);
+            btn.classList.add('btn');
+            btn.classList.add('btn-default');
+            myKeys.set(btn, key);
+            myView.insertBefore(btn, myView.childNodes[0]);
+            if (auto_open) {
+                auto_open = false;
+                _click.call(this, btn);
+            }
+        },
+        update_title(key) {
+            const title = checkForEmptyTitle(this.get(key, 'title'));
+            const open_key = myKeys.get(open_el);
+            if (key === open_key) {
+                open_el.innerText = title;
+                open_el.setAttribute('title', title);
+            }
+            else {
+                const els = Array.from(myView.children);
+                const el = els.find(el => myKeys.get(el) === key);
+                if (!el)
+                    return console.error('List could not find key ' + key);
+                if (!(el instanceof HTMLButtonElement)) {
+                    return console.error('List requires element of key ' +
+                        key +
+                        ' to be instanceof HTMLButtonElement');
+                }
+                el.innerText = title;
+                el.setAttribute('title', title);
+            }
+        },
+        delete(key) {
+            const open_key = myKeys.get(open_el);
+            if (key === open_key) {
+                const next_sibling = open_el.nextElementSibling;
+                open_el.remove();
+                open_el = null;
+                if (next_sibling === null) {
+                    this.emit(myToolbar + 'disableButton', 'delete');
+                    this.emit(myDetail + 'clear');
+                }
+                else {
+                    app.run(myModel, _click, next_sibling);
+                }
+            }
+            else {
+                const els = Array.from(myView.children);
+                const el = els.find(el => myKeys.get(el) === key);
+                if (!el)
+                    return console.error('List could not find key ' + key);
+                el.remove();
+            }
+        },
+        [myToolbar + 'delete']() {
+            this.delete(myKeys.get(open_el));
+        },
+        [myToolbar + 'new']() {
+            auto_open = true;
+            this.new();
+        },
+    });
+    // Fill List with existing items
+    app.run(myModel, function () {
+        this.getKeys()
+            .sort((a, b) => {
+            // sort by created date descending
+            const a_created = Date.parse(this.get(a, 'created'));
+            const b_created = Date.parse(this.get(b, 'created'));
+            return a_created > b_created;
+        })
+            .forEach((key) => this.emit('new', key));
+    });
+}
+exports.default = List;
 
 
 /***/ })
