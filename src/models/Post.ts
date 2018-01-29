@@ -26,11 +26,12 @@ function convert(prop: string): string {
 export default async function Note(app: ViewModel.Interface): Promise<string> {
   const myName = 'Post';
   const POSTS: {[id: string]: CmsPost} = {};
+  let headers: Headers;
 
   app.create(myName, {
     async new() {
       try {
-        const pid = await posts.createPost({body: {}});
+        const pid = await posts.createPost({body: {}}, {headers});
         this.emit('new', pid);
       } catch (e) {
         console.error(e);
@@ -96,8 +97,8 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
       }
       if (changed) {
         try {
-          await posts.updatePost({id, body: p});
-          const pu = await posts.getPost({id});
+          await posts.updatePost({id, body: p}, {headers});
+          const pu = await posts.getPost({id}, {headers});
           POSTS[id].last_edited = pu.last_edited;
           this.emit('update_modified', id);
         } catch (e) {
@@ -107,7 +108,7 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
     },
     async delete(id) {
       try {
-        const pid = await posts.deletePost({id});
+        const pid = await posts.deletePost({id}, {headers});
         delete POSTS[id];
         this.emit('delete', id);
       } catch (e) {
@@ -128,17 +129,16 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
     if (!access_token) {
       throw 'state.authUser.access_token must exist';
     }
+    headers = new Headers({
+      Authorization: `Bearer ${access_token}`,
+    });
     await streamRequest(
       basePath + '/posts',
       (pc: PostChunk) => {
         const p = pc.result;
         POSTS[p.id] = p;
       },
-      {
-        headers: new Headers({
-          Authorization: `Bearer ${access_token}`,
-        }),
-      },
+      {headers},
     );
   } catch (e) {
     console.error(e);

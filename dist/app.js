@@ -481,11 +481,12 @@ function Note(app) {
     return __awaiter(this, void 0, void 0, function* () {
         const myName = 'Post';
         const POSTS = {};
+        let headers;
         app.create(myName, {
             new() {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
-                        const pid = yield api_1.posts.createPost({ body: {} });
+                        const pid = yield api_1.posts.createPost({ body: {} }, { headers });
                         this.emit('new', pid);
                     }
                     catch (e) {
@@ -532,8 +533,8 @@ function Note(app) {
                     }
                     if (changed) {
                         try {
-                            yield api_1.posts.updatePost({ id, body: p });
-                            const pu = yield api_1.posts.getPost({ id });
+                            yield api_1.posts.updatePost({ id, body: p }, { headers });
+                            const pu = yield api_1.posts.getPost({ id }, { headers });
                             POSTS[id].last_edited = pu.last_edited;
                             this.emit('update_modified', id);
                         }
@@ -546,7 +547,7 @@ function Note(app) {
             delete(id) {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
-                        const pid = yield api_1.posts.deletePost({ id });
+                        const pid = yield api_1.posts.deletePost({ id }, { headers });
                         delete POSTS[id];
                         this.emit('delete', id);
                     }
@@ -569,14 +570,13 @@ function Note(app) {
             if (!access_token) {
                 throw 'state.authUser.access_token must exist';
             }
+            headers = new Headers({
+                Authorization: `Bearer ${access_token}`,
+            });
             yield api_1.streamRequest(api_1.basePath + '/posts', (pc) => {
                 const p = pc.result;
                 POSTS[p.id] = p;
-            }, {
-                headers: new Headers({
-                    Authorization: `Bearer ${access_token}`,
-                }),
-            });
+            }, { headers });
         }
         catch (e) {
             console.error(e);
