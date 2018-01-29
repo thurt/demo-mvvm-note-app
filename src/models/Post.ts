@@ -3,6 +3,7 @@ import generateUUID = require('../lib/generateUUID');
 import ViewModel = require('view-model');
 import {auth, posts, basePath, streamRequest} from '../api';
 import {CmsPost, CmsAccessToken, CmsUser} from 'cms-client-api';
+import debounce = require('debounce');
 
 const STORE = Store('localStorage');
 
@@ -23,16 +24,35 @@ function convert(prop: string): string {
       return prop;
   }
 }
+
+function fillUndefined(p: CmsPost): void {
+  if (p.title === undefined) {
+    p.title = '';
+  }
+  if (p.content === undefined) {
+    p.content = '';
+  }
+}
+
 export default async function Note(app: ViewModel.Interface): Promise<string> {
   const myName = 'Post';
   const POSTS: {[id: string]: CmsPost} = {};
-  let headers: Headers;
+  let access_token: string;
 
   app.create(myName, {
     async new() {
       try {
-        const pid = await posts.createPost({body: {}}, {headers});
-        this.emit('new', pid);
+        const res = await posts.createPost(
+          {body: {}},
+          {headers: {Authorization: 'Bearer ' + access_token}},
+        );
+        const p = await posts.getPost(
+          {id: res.id},
+          {headers: {Authorization: 'Bearer ' + access_token}},
+        );
+        fillUndefined(p);
+        POSTS[p.id] = p;
+        this.emit('new', p.id);
       } catch (e) {
         console.error(e);
       }
@@ -44,7 +64,7 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
       const cp = convert(prop);
       //@ts-ignore
       const nkp = nk[cp];
-      if (nkp === undefined)
+      if (nkp === undefined) {
         return console.warn(
           this.name,
           'property',
@@ -53,6 +73,7 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
           key,
           'does not exist',
         );
+      }
       if (typeof nkp === 'object' && nkp !== null)
         return console.warn(
           this.name,
@@ -68,47 +89,60 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
     getKeys() {
       return Object.keys(POSTS);
     },
-    async update(id, obj) {
-      let changed = false;
-      const p = POSTS[id];
-      if (p === undefined)
-        return console.warn(this.name, 'id', id, 'does not exist');
-      for (let prop in obj) {
-        const cp = convert(prop);
-        //@ts-ignore
-        let pp = p[cp];
-        if (pp === undefined) {
-          console.warn(
-            this.name,
-            'property',
-            prop,
-            'for id',
-            id,
-            'does not exist',
-          );
-          continue;
-        }
-        if (pp !== obj[prop]) {
+    update: debounce(
+      async function(id: number, obj: {[p: string]: any}) {
+        let changed = false;
+        const p = POSTS[id];
+        if (p === undefined)
+          return console.warn(this.name, 'id', id, 'does not exist');
+        for (let prop in obj) {
+          const cp = convert(prop);
           //@ts-ignore
-          p[cp] = obj[prop];
-          this.emit('update_' + prop, id);
-          changed = true;
+          let pp = p[cp];
+          if (pp === undefined) {
+            console.warn(
+              this.name,
+              'property',
+              prop,
+              'for id',
+              id,
+              'does not exist',
+            );
+            continue;
+          }
+          if (pp !== obj[prop]) {
+            //@ts-ignore
+            p[cp] = obj[prop];
+            this.emit('update_' + prop, id);
+            changed = true;
+          }
         }
-      }
-      if (changed) {
-        try {
-          await posts.updatePost({id, body: p}, {headers});
-          const pu = await posts.getPost({id}, {headers});
-          POSTS[id].last_edited = pu.last_edited;
-          this.emit('update_modified', id);
-        } catch (e) {
-          console.error(e);
+        if (changed) {
+          try {
+            await posts.updatePost(
+              {id, body: p},
+              {headers: {Authorization: 'Bearer ' + access_token}},
+            );
+            const pu = await posts.getPost(
+              {id},
+              {headers: {Authorization: 'Bearer ' + access_token}},
+            );
+            POSTS[id].last_edited = pu.last_edited;
+            this.emit('update_modified', id);
+          } catch (e) {
+            console.error(e);
+          }
         }
-      }
-    },
+      },
+      5000,
+      false,
+    ),
     async delete(id) {
       try {
-        const pid = await posts.deletePost({id}, {headers});
+        const pid = await posts.deletePost(
+          {id},
+          {headers: {Authorization: 'Bearer ' + access_token}},
+        );
         delete POSTS[id];
         this.emit('delete', id);
       } catch (e) {
@@ -125,20 +159,18 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
     } else {
       throw "STORE.get('state') must exist";
     }
-    const access_token = s.authUser && s.authUser.access_token;
+    access_token = s.authUser && s.authUser.access_token;
     if (!access_token) {
       throw 'state.authUser.access_token must exist';
     }
-    headers = new Headers({
-      Authorization: `Bearer ${access_token}`,
-    });
     await streamRequest(
       basePath + '/posts?includeUnPublished=true',
       (pc: PostChunk) => {
         const p = pc.result;
+        fillUndefined(p);
         POSTS[p.id] = p;
       },
-      {headers},
+      {headers: {Authorization: 'Bearer ' + access_token}},
     );
   } catch (e) {
     console.error(e);

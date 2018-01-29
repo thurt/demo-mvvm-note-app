@@ -466,6 +466,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const Store = __webpack_require__(14);
 const api_1 = __webpack_require__(15);
+const debounce = __webpack_require__(59);
 const STORE = Store('localStorage');
 function convert(prop) {
     switch (prop) {
@@ -477,17 +478,28 @@ function convert(prop) {
             return prop;
     }
 }
+function fillUndefined(p) {
+    if (p.title === undefined) {
+        p.title = '';
+    }
+    if (p.content === undefined) {
+        p.content = '';
+    }
+}
 function Note(app) {
     return __awaiter(this, void 0, void 0, function* () {
         const myName = 'Post';
         const POSTS = {};
-        let headers;
+        let access_token;
         app.create(myName, {
             new() {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
-                        const pid = yield api_1.posts.createPost({ body: {} }, { headers });
-                        this.emit('new', pid);
+                        const res = yield api_1.posts.createPost({ body: {} }, { headers: { Authorization: 'Bearer ' + access_token } });
+                        const p = yield api_1.posts.getPost({ id: res.id }, { headers: { Authorization: 'Bearer ' + access_token } });
+                        fillUndefined(p);
+                        POSTS[p.id] = p;
+                        this.emit('new', p.id);
                     }
                     catch (e) {
                         console.error(e);
@@ -501,8 +513,9 @@ function Note(app) {
                 const cp = convert(prop);
                 //@ts-ignore
                 const nkp = nk[cp];
-                if (nkp === undefined)
+                if (nkp === undefined) {
                     return console.warn(this.name, 'property', prop, 'for key', key, 'does not exist');
+                }
                 if (typeof nkp === 'object' && nkp !== null)
                     return console.warn(this.name, 'property', prop, 'for key', key, 'is an object. Only primitives can be accessed.');
                 return nkp;
@@ -510,7 +523,7 @@ function Note(app) {
             getKeys() {
                 return Object.keys(POSTS);
             },
-            update(id, obj) {
+            update: debounce(function (id, obj) {
                 return __awaiter(this, void 0, void 0, function* () {
                     let changed = false;
                     const p = POSTS[id];
@@ -533,8 +546,8 @@ function Note(app) {
                     }
                     if (changed) {
                         try {
-                            yield api_1.posts.updatePost({ id, body: p }, { headers });
-                            const pu = yield api_1.posts.getPost({ id }, { headers });
+                            yield api_1.posts.updatePost({ id, body: p }, { headers: { Authorization: 'Bearer ' + access_token } });
+                            const pu = yield api_1.posts.getPost({ id }, { headers: { Authorization: 'Bearer ' + access_token } });
                             POSTS[id].last_edited = pu.last_edited;
                             this.emit('update_modified', id);
                         }
@@ -543,11 +556,11 @@ function Note(app) {
                         }
                     }
                 });
-            },
+            }, 5000, false),
             delete(id) {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
-                        const pid = yield api_1.posts.deletePost({ id }, { headers });
+                        const pid = yield api_1.posts.deletePost({ id }, { headers: { Authorization: 'Bearer ' + access_token } });
                         delete POSTS[id];
                         this.emit('delete', id);
                     }
@@ -566,17 +579,15 @@ function Note(app) {
             else {
                 throw "STORE.get('state') must exist";
             }
-            const access_token = s.authUser && s.authUser.access_token;
+            access_token = s.authUser && s.authUser.access_token;
             if (!access_token) {
                 throw 'state.authUser.access_token must exist';
             }
-            headers = new Headers({
-                Authorization: `Bearer ${access_token}`,
-            });
             yield api_1.streamRequest(api_1.basePath + '/posts?includeUnPublished=true', (pc) => {
                 const p = pc.result;
+                fillUndefined(p);
                 POSTS[p.id] = p;
-            }, { headers });
+            }, { headers: { Authorization: 'Bearer ' + access_token } });
         }
         catch (e) {
             console.error(e);
@@ -4772,6 +4783,78 @@ function List(myToolbar, myDetail, myModel, app) {
     });
 }
 exports.default = List;
+
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports) {
+
+/**
+ * Returns a function, that, as long as it continues to be invoked, will not
+ * be triggered. The function will be called after it stops being called for
+ * N milliseconds. If `immediate` is passed, trigger the function on the
+ * leading edge, instead of the trailing. The function also has a property 'clear' 
+ * that is a function which will clear the timer to prevent previously scheduled executions. 
+ *
+ * @source underscore.js
+ * @see http://unscriptable.com/2009/03/20/debouncing-javascript-methods/
+ * @param {Function} function to wrap
+ * @param {Number} timeout in ms (`100`)
+ * @param {Boolean} whether to execute at the beginning (`false`)
+ * @api public
+ */
+
+module.exports = function debounce(func, wait, immediate){
+  var timeout, args, context, timestamp, result;
+  if (null == wait) wait = 100;
+
+  function later() {
+    var last = Date.now() - timestamp;
+
+    if (last < wait && last >= 0) {
+      timeout = setTimeout(later, wait - last);
+    } else {
+      timeout = null;
+      if (!immediate) {
+        result = func.apply(context, args);
+        context = args = null;
+      }
+    }
+  };
+
+  var debounced = function(){
+    context = this;
+    args = arguments;
+    timestamp = Date.now();
+    var callNow = immediate && !timeout;
+    if (!timeout) timeout = setTimeout(later, wait);
+    if (callNow) {
+      result = func.apply(context, args);
+      context = args = null;
+    }
+
+    return result;
+  };
+
+  debounced.clear = function() {
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+  };
+  
+  debounced.flush = function() {
+    if (timeout) {
+      result = func.apply(context, args);
+      context = args = null;
+      
+      clearTimeout(timeout);
+      timeout = null;
+    }
+  };
+
+  return debounced;
+};
 
 
 /***/ })
