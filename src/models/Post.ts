@@ -2,7 +2,12 @@ import * as Store from 'storage-manager';
 import generateUUID = require('../lib/generateUUID');
 import ViewModel = require('view-model');
 import {auth, posts, basePath, streamRequest} from '../api';
-import {CmsPost, CmsAccessToken, CmsUser} from 'cms-client-api';
+import {
+  CmsPost,
+  CmsUpdatePostRequest,
+  CmsAccessToken,
+  CmsUser,
+} from 'cms-client-api';
 import debounce = require('debounce');
 import * as error from '../error';
 
@@ -42,6 +47,29 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
   const myName = 'Post';
   const POSTS: {[id: string]: CmsPost} = {};
   let access_token: string;
+
+  const updatePost = debounce(
+    function(id: number, p: CmsUpdatePostRequest) {
+      app.run(myName, async function() {
+        try {
+          await posts.updatePost(
+            {id, body: p},
+            {headers: {Authorization: 'Bearer ' + access_token}},
+          );
+          const pu = await posts.getPost(
+            {id},
+            {headers: {Authorization: 'Bearer ' + access_token}},
+          );
+          POSTS[id].last_edited = pu.last_edited;
+          this.emit('update_modified', id);
+        } catch (e) {
+          error.Handle(e);
+        }
+      });
+    },
+    3000,
+    false,
+  );
 
   app.create(myName, {
     async new() {
@@ -93,54 +121,37 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
     getKeys() {
       return Object.keys(POSTS);
     },
-    update: debounce(
-      async function(id: number, obj: {[p: string]: any}) {
-        let changed = false;
-        const p = POSTS[id];
-        if (p === undefined)
-          return console.warn(this.name, 'id', id, 'does not exist');
-        for (let prop in obj) {
-          const cp = convert(prop);
+    update(id: number, obj: {[p: string]: any}) {
+      let changed = false;
+      const p = POSTS[id];
+      if (p === undefined)
+        return console.warn(this.name, 'id', id, 'does not exist');
+      for (let prop in obj) {
+        const cp = convert(prop);
+        //@ts-ignore
+        let pp = p[cp];
+        if (pp === undefined) {
+          console.warn(
+            this.name,
+            'property',
+            prop,
+            'for id',
+            id,
+            'does not exist',
+          );
+          continue;
+        }
+        if (pp !== obj[prop]) {
           //@ts-ignore
-          let pp = p[cp];
-          if (pp === undefined) {
-            console.warn(
-              this.name,
-              'property',
-              prop,
-              'for id',
-              id,
-              'does not exist',
-            );
-            continue;
-          }
-          if (pp !== obj[prop]) {
-            //@ts-ignore
-            p[cp] = obj[prop];
-            this.emit('update_' + prop, id);
-            changed = true;
-          }
+          p[cp] = obj[prop];
+          this.emit('update_' + prop, id);
+          changed = true;
         }
-        if (changed) {
-          try {
-            await posts.updatePost(
-              {id, body: p},
-              {headers: {Authorization: 'Bearer ' + access_token}},
-            );
-            const pu = await posts.getPost(
-              {id},
-              {headers: {Authorization: 'Bearer ' + access_token}},
-            );
-            POSTS[id].last_edited = pu.last_edited;
-            this.emit('update_modified', id);
-          } catch (e) {
-            error.Handle(e);
-          }
-        }
-      },
-      3000,
-      false,
-    ),
+      }
+      if (changed) {
+        updatePost(id, p);
+      }
+    },
     async delete(id) {
       try {
         await posts.deletePost(

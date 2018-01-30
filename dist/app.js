@@ -171,9 +171,9 @@ module.exports = function (it) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const ViewModel = __webpack_require__(10);
 const Post_1 = __webpack_require__(13);
-const Toolbar_1 = __webpack_require__(58);
-const Detail_1 = __webpack_require__(59);
-const List_1 = __webpack_require__(60);
+const Toolbar_1 = __webpack_require__(56);
+const Detail_1 = __webpack_require__(57);
+const List_1 = __webpack_require__(58);
 const MyViewModel = ViewModel(true);
 let toolbar_name = 'toolbar_';
 let detail_name = 'detail_';
@@ -466,8 +466,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const Store = __webpack_require__(14);
 const api_1 = __webpack_require__(15);
-const debounce = __webpack_require__(56);
-const error = __webpack_require__(57);
+const debounce = __webpack_require__(59);
+const error = __webpack_require__(60);
 const STORE = Store('localStorage');
 function convert(prop) {
     switch (prop) {
@@ -495,6 +495,21 @@ function Note(app) {
         const myName = 'Post';
         const POSTS = {};
         let access_token;
+        const updatePost = debounce(function (id, p) {
+            app.run(myName, function () {
+                return __awaiter(this, void 0, void 0, function* () {
+                    try {
+                        yield api_1.posts.updatePost({ id, body: p }, { headers: { Authorization: 'Bearer ' + access_token } });
+                        const pu = yield api_1.posts.getPost({ id }, { headers: { Authorization: 'Bearer ' + access_token } });
+                        POSTS[id].last_edited = pu.last_edited;
+                        this.emit('update_modified', id);
+                    }
+                    catch (e) {
+                        error.Handle(e);
+                    }
+                });
+            });
+        }, 3000, false);
         app.create(myName, {
             new() {
                 return __awaiter(this, void 0, void 0, function* () {
@@ -527,40 +542,30 @@ function Note(app) {
             getKeys() {
                 return Object.keys(POSTS);
             },
-            update: debounce(function (id, obj) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    let changed = false;
-                    const p = POSTS[id];
-                    if (p === undefined)
-                        return console.warn(this.name, 'id', id, 'does not exist');
-                    for (let prop in obj) {
-                        const cp = convert(prop);
+            update(id, obj) {
+                let changed = false;
+                const p = POSTS[id];
+                if (p === undefined)
+                    return console.warn(this.name, 'id', id, 'does not exist');
+                for (let prop in obj) {
+                    const cp = convert(prop);
+                    //@ts-ignore
+                    let pp = p[cp];
+                    if (pp === undefined) {
+                        console.warn(this.name, 'property', prop, 'for id', id, 'does not exist');
+                        continue;
+                    }
+                    if (pp !== obj[prop]) {
                         //@ts-ignore
-                        let pp = p[cp];
-                        if (pp === undefined) {
-                            console.warn(this.name, 'property', prop, 'for id', id, 'does not exist');
-                            continue;
-                        }
-                        if (pp !== obj[prop]) {
-                            //@ts-ignore
-                            p[cp] = obj[prop];
-                            this.emit('update_' + prop, id);
-                            changed = true;
-                        }
+                        p[cp] = obj[prop];
+                        this.emit('update_' + prop, id);
+                        changed = true;
                     }
-                    if (changed) {
-                        try {
-                            yield api_1.posts.updatePost({ id, body: p }, { headers: { Authorization: 'Bearer ' + access_token } });
-                            const pu = yield api_1.posts.getPost({ id }, { headers: { Authorization: 'Bearer ' + access_token } });
-                            POSTS[id].last_edited = pu.last_edited;
-                            this.emit('update_modified', id);
-                        }
-                        catch (e) {
-                            error.Handle(e);
-                        }
-                    }
-                });
-            }, 3000, false),
+                }
+                if (changed) {
+                    updatePost(id, p);
+                }
+            },
             delete(id) {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
@@ -4568,119 +4573,6 @@ module.exports = {};
 
 /***/ }),
 /* 56 */
-/***/ (function(module, exports) {
-
-/**
- * Returns a function, that, as long as it continues to be invoked, will not
- * be triggered. The function will be called after it stops being called for
- * N milliseconds. If `immediate` is passed, trigger the function on the
- * leading edge, instead of the trailing. The function also has a property 'clear' 
- * that is a function which will clear the timer to prevent previously scheduled executions. 
- *
- * @source underscore.js
- * @see http://unscriptable.com/2009/03/20/debouncing-javascript-methods/
- * @param {Function} function to wrap
- * @param {Number} timeout in ms (`100`)
- * @param {Boolean} whether to execute at the beginning (`false`)
- * @api public
- */
-
-module.exports = function debounce(func, wait, immediate){
-  var timeout, args, context, timestamp, result;
-  if (null == wait) wait = 100;
-
-  function later() {
-    var last = Date.now() - timestamp;
-
-    if (last < wait && last >= 0) {
-      timeout = setTimeout(later, wait - last);
-    } else {
-      timeout = null;
-      if (!immediate) {
-        result = func.apply(context, args);
-        context = args = null;
-      }
-    }
-  };
-
-  var debounced = function(){
-    context = this;
-    args = arguments;
-    timestamp = Date.now();
-    var callNow = immediate && !timeout;
-    if (!timeout) timeout = setTimeout(later, wait);
-    if (callNow) {
-      result = func.apply(context, args);
-      context = args = null;
-    }
-
-    return result;
-  };
-
-  debounced.clear = function() {
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = null;
-    }
-  };
-  
-  debounced.flush = function() {
-    if (timeout) {
-      result = func.apply(context, args);
-      context = args = null;
-      
-      clearTimeout(timeout);
-      timeout = null;
-    }
-  };
-
-  return debounced;
-};
-
-
-/***/ }),
-/* 57 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function Handle(e) {
-    if (e instanceof Error) {
-        console.error(e);
-        //@ts-ignore
-        window.top.Notify.addNotification({
-            title: 'Server Error',
-            message: 'Sorry, something went wrong when trying to communicate with the server. Please try again later.',
-            level: 'error',
-        });
-    }
-    if (e instanceof Response) {
-        e
-            .json()
-            .then((apie) => 
-        //@ts-ignore
-        window.top.Notify.addNotification({
-            title: e.statusText,
-            message: apie.error,
-            level: 'error',
-        }))
-            .catch(parsee => {
-            console.error(parsee);
-            //@ts-ignore
-            window.top.Notify.addNotification({
-                title: 'Server Error',
-                message: 'Sorry, something went wrong when trying to communicate with the server. Please try again later.',
-                level: 'error',
-            });
-        });
-    }
-}
-exports.Handle = Handle;
-
-
-/***/ }),
-/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4727,7 +4619,7 @@ exports.default = Toolbar;
 
 
 /***/ }),
-/* 59 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4829,7 +4721,7 @@ exports.default = Detail;
 
 
 /***/ }),
-/* 60 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4948,6 +4840,119 @@ function List(myToolbar, myDetail, myModel, app) {
     });
 }
 exports.default = List;
+
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports) {
+
+/**
+ * Returns a function, that, as long as it continues to be invoked, will not
+ * be triggered. The function will be called after it stops being called for
+ * N milliseconds. If `immediate` is passed, trigger the function on the
+ * leading edge, instead of the trailing. The function also has a property 'clear' 
+ * that is a function which will clear the timer to prevent previously scheduled executions. 
+ *
+ * @source underscore.js
+ * @see http://unscriptable.com/2009/03/20/debouncing-javascript-methods/
+ * @param {Function} function to wrap
+ * @param {Number} timeout in ms (`100`)
+ * @param {Boolean} whether to execute at the beginning (`false`)
+ * @api public
+ */
+
+module.exports = function debounce(func, wait, immediate){
+  var timeout, args, context, timestamp, result;
+  if (null == wait) wait = 100;
+
+  function later() {
+    var last = Date.now() - timestamp;
+
+    if (last < wait && last >= 0) {
+      timeout = setTimeout(later, wait - last);
+    } else {
+      timeout = null;
+      if (!immediate) {
+        result = func.apply(context, args);
+        context = args = null;
+      }
+    }
+  };
+
+  var debounced = function(){
+    context = this;
+    args = arguments;
+    timestamp = Date.now();
+    var callNow = immediate && !timeout;
+    if (!timeout) timeout = setTimeout(later, wait);
+    if (callNow) {
+      result = func.apply(context, args);
+      context = args = null;
+    }
+
+    return result;
+  };
+
+  debounced.clear = function() {
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+  };
+  
+  debounced.flush = function() {
+    if (timeout) {
+      result = func.apply(context, args);
+      context = args = null;
+      
+      clearTimeout(timeout);
+      timeout = null;
+    }
+  };
+
+  return debounced;
+};
+
+
+/***/ }),
+/* 60 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function Handle(e) {
+    if (e instanceof Error) {
+        console.error(e);
+        //@ts-ignore
+        window.top.Notify.addNotification({
+            title: 'Server Error',
+            message: 'Sorry, something went wrong when trying to communicate with the server. Please try again later.',
+            level: 'error',
+        });
+    }
+    if (e instanceof Response) {
+        e
+            .json()
+            .then((apie) => 
+        //@ts-ignore
+        window.top.Notify.addNotification({
+            title: e.statusText,
+            message: apie.error,
+            level: 'error',
+        }))
+            .catch(parsee => {
+            console.error(parsee);
+            //@ts-ignore
+            window.top.Notify.addNotification({
+                title: 'Server Error',
+                message: 'Sorry, something went wrong when trying to communicate with the server. Please try again later.',
+                level: 'error',
+            });
+        });
+    }
+}
+exports.Handle = Handle;
 
 
 /***/ })
