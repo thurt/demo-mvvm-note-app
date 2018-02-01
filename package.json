@@ -2,14 +2,16 @@
   "name": "demo-mvvm-note-app",
   "version": "1.0.3",
   "description": "A simple Note App",
-  "main": "dist/index.html",
+  "main": "dist/app.html",
   "scripts": {
-    "minify-html": "prettydiff lang:'html' mode:'minify' source:'src/app.html' > dist/app.html",
+    "minify-html":
+      "prettydiff lang:'html' mode:'minify' source:'src/app.html' > dist/app.html",
     "build": "webpack && npm run minify-html"
   },
   "author": "thurt",
   "license": "ISC",
   "devDependencies": {
+    "@types/debounce": "^1.0.0",
     "awesome-typescript-loader": "^3.4.1",
     "prettydiff": "github:prettydiff/prettydiff#v2.1.8",
     "source-map-loader": "^0.2.3",
@@ -17,7 +19,6 @@
     "webpack": "^3.10.0"
   },
   "dependencies": {
-    "@types/debounce": "^1.0.0",
     "can-ndjson-stream": "^0.1.7",
     "cms-client-api": "github:thurt/cms-client-api",
     "debounce": "^1.1.0",
