@@ -14,14 +14,23 @@ export function Handle(e: Error | Response) {
   if (e instanceof Response) {
     e
       .json()
-      .then((apie: api.Error) =>
-        //@ts-ignore
-        window.top.Notify.addNotification({
-          title: e.statusText,
-          message: apie.error,
-          level: 'error',
-        }),
-      )
+      .then((apie: api.Error | api.StreamError) => {
+        if (typeof apie.error === 'string') {
+          //@ts-ignore
+          window.top.Notify.addNotification({
+            title: e.statusText,
+            message: apie.error,
+            level: 'error',
+          });
+        } else {
+          //@ts-ignore
+          window.top.Notify.addNotification({
+            title: e.statusText,
+            message: apie.error.message,
+            level: 'error',
+          });
+        }
+      })
       .catch(parsee => {
         console.error(parsee);
         //@ts-ignore
