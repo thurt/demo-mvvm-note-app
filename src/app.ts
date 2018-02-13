@@ -8,7 +8,13 @@ const MyViewModel = ViewModel(true);
 let toolbar_name = 'toolbar_';
 let detail_name = 'detail_';
 
-Post(MyViewModel)
+declare global {
+  interface Window {
+    errorHandler: (e: Error | Response) => void;
+  }
+}
+
+Post(MyViewModel, window.errorHandler)
   .then(model_name => {
     Toolbar(toolbar_name, model_name, MyViewModel);
     Detail(detail_name, model_name, MyViewModel);

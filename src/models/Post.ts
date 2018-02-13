@@ -9,7 +9,6 @@ import {
   CmsUser,
 } from 'cms-client-api';
 import debounce = require('debounce');
-import * as error from '../error';
 
 const STORE = Store('localStorage');
 
@@ -43,7 +42,10 @@ function fillUndefined(p: CmsPost): void {
   }
 }
 
-export default async function Note(app: ViewModel.Interface): Promise<string> {
+export default async function Note(
+  app: ViewModel.Interface,
+  errorHandler: (e: Error | Response) => void,
+): Promise<string> {
   const myName = 'Post';
   const POSTS: {[id: string]: CmsPost} = {};
   let access_token: string;
@@ -63,7 +65,7 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
           POSTS[id].last_edited = pu.last_edited;
           this.emit('update_modified', id);
         } catch (e) {
-          error.Handle(e);
+          errorHandler(e);
         }
       });
     },
@@ -86,7 +88,7 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
         POSTS[p.id] = p;
         this.emit('new', p.id);
       } catch (e) {
-        error.Handle(e);
+        errorHandler(e);
       }
     },
     get(key, prop) {
@@ -161,7 +163,7 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
         delete POSTS[id];
         this.emit('delete', id);
       } catch (e) {
-        error.Handle(e);
+        errorHandler(e);
       }
     },
   });
@@ -188,7 +190,7 @@ export default async function Note(app: ViewModel.Interface): Promise<string> {
       {headers: {Authorization: 'Bearer ' + access_token}},
     );
   } catch (e) {
-    error.Handle(e);
+    errorHandler(e);
   }
 
   return myName;
