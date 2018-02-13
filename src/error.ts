@@ -14,7 +14,7 @@ export function Handle(e: Error | Response) {
   if (e instanceof Response) {
     e
       .json()
-      .then((apie: api.Error | api.StreamError) => {
+      .then((apie: api.Error) => {
         if (typeof apie.error === 'string') {
           //@ts-ignore
           window.top.Notify.addNotification({
