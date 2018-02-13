@@ -6,10 +6,19 @@ export const posts = new api.PostsApi(undefined, basePath);
 export const auth = new api.AuthApi(undefined, basePath);
 
 // Error is the interface returned by the api in the response body when a request error has occurred. Common examples of request errors that would cause the server to respond with an Error would be when the the request contains invalid or missing values, or when a request is made for a non-existant entity.
-export interface Error {
+export type Error = {
   error: string;
   code: number;
-}
+};
+
+export type StreamError = {
+  error: {
+    grpc_code: number;
+    http_code: number;
+    message: string;
+    http_status: string;
+  };
+};
 
 type chunk = {
   done: boolean;
