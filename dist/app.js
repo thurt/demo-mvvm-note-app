@@ -4934,13 +4934,24 @@ function Handle(e) {
     if (e instanceof Response) {
         e
             .json()
-            .then((apie) => 
-        //@ts-ignore
-        window.top.Notify.addNotification({
-            title: e.statusText,
-            message: apie.error,
-            level: 'error',
-        }))
+            .then((apie) => {
+            if (typeof apie.error === 'string') {
+                //@ts-ignore
+                window.top.Notify.addNotification({
+                    title: e.statusText,
+                    message: apie.error,
+                    level: 'error',
+                });
+            }
+            else {
+                //@ts-ignore
+                window.top.Notify.addNotification({
+                    title: e.statusText,
+                    message: apie.error.message,
+                    level: 'error',
+                });
+            }
+        })
             .catch(parsee => {
             console.error(parsee);
             //@ts-ignore
