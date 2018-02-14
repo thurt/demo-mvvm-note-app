@@ -171,13 +171,13 @@ module.exports = function (it) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const ViewModel = __webpack_require__(10);
 const Post_1 = __webpack_require__(13);
-const Toolbar_1 = __webpack_require__(56);
-const Detail_1 = __webpack_require__(57);
-const List_1 = __webpack_require__(58);
+const Toolbar_1 = __webpack_require__(57);
+const Detail_1 = __webpack_require__(58);
+const List_1 = __webpack_require__(59);
 const MyViewModel = ViewModel(true);
 let toolbar_name = 'toolbar_';
 let detail_name = 'detail_';
-Post_1.default(MyViewModel)
+Post_1.default(MyViewModel, window.errorHandler)
     .then(model_name => {
     Toolbar_1.default(toolbar_name, model_name, MyViewModel);
     Detail_1.default(detail_name, model_name, MyViewModel);
@@ -466,8 +466,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const Store = __webpack_require__(14);
 const api_1 = __webpack_require__(15);
-const debounce = __webpack_require__(59);
-const error = __webpack_require__(60);
+const debounce = __webpack_require__(56);
 const STORE = Store('localStorage');
 function convert(prop) {
     switch (prop) {
@@ -490,7 +489,7 @@ function fillUndefined(p) {
         p.published = false;
     }
 }
-function Note(app) {
+function Note(app, errorHandler) {
     return __awaiter(this, void 0, void 0, function* () {
         const myName = 'Post';
         const POSTS = {};
@@ -505,7 +504,7 @@ function Note(app) {
                         this.emit('update_modified', id);
                     }
                     catch (e) {
-                        error.Handle(e);
+                        errorHandler(e);
                     }
                 });
             });
@@ -521,7 +520,7 @@ function Note(app) {
                         this.emit('new', p.id);
                     }
                     catch (e) {
-                        error.Handle(e);
+                        errorHandler(e);
                     }
                 });
             },
@@ -574,7 +573,7 @@ function Note(app) {
                         this.emit('delete', id);
                     }
                     catch (e) {
-                        error.Handle(e);
+                        errorHandler(e);
                     }
                 });
             },
@@ -599,7 +598,7 @@ function Note(app) {
             }, { headers: { Authorization: 'Bearer ' + access_token } });
         }
         catch (e) {
-            error.Handle(e);
+            errorHandler(e);
         }
         return myName;
     });
@@ -4573,6 +4572,78 @@ module.exports = {};
 
 /***/ }),
 /* 56 */
+/***/ (function(module, exports) {
+
+/**
+ * Returns a function, that, as long as it continues to be invoked, will not
+ * be triggered. The function will be called after it stops being called for
+ * N milliseconds. If `immediate` is passed, trigger the function on the
+ * leading edge, instead of the trailing. The function also has a property 'clear' 
+ * that is a function which will clear the timer to prevent previously scheduled executions. 
+ *
+ * @source underscore.js
+ * @see http://unscriptable.com/2009/03/20/debouncing-javascript-methods/
+ * @param {Function} function to wrap
+ * @param {Number} timeout in ms (`100`)
+ * @param {Boolean} whether to execute at the beginning (`false`)
+ * @api public
+ */
+
+module.exports = function debounce(func, wait, immediate){
+  var timeout, args, context, timestamp, result;
+  if (null == wait) wait = 100;
+
+  function later() {
+    var last = Date.now() - timestamp;
+
+    if (last < wait && last >= 0) {
+      timeout = setTimeout(later, wait - last);
+    } else {
+      timeout = null;
+      if (!immediate) {
+        result = func.apply(context, args);
+        context = args = null;
+      }
+    }
+  };
+
+  var debounced = function(){
+    context = this;
+    args = arguments;
+    timestamp = Date.now();
+    var callNow = immediate && !timeout;
+    if (!timeout) timeout = setTimeout(later, wait);
+    if (callNow) {
+      result = func.apply(context, args);
+      context = args = null;
+    }
+
+    return result;
+  };
+
+  debounced.clear = function() {
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+  };
+  
+  debounced.flush = function() {
+    if (timeout) {
+      result = func.apply(context, args);
+      context = args = null;
+      
+      clearTimeout(timeout);
+      timeout = null;
+    }
+  };
+
+  return debounced;
+};
+
+
+/***/ }),
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4619,7 +4690,7 @@ exports.default = Toolbar;
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4721,7 +4792,7 @@ exports.default = Detail;
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4840,130 +4911,6 @@ function List(myToolbar, myDetail, myModel, app) {
     });
 }
 exports.default = List;
-
-
-/***/ }),
-/* 59 */
-/***/ (function(module, exports) {
-
-/**
- * Returns a function, that, as long as it continues to be invoked, will not
- * be triggered. The function will be called after it stops being called for
- * N milliseconds. If `immediate` is passed, trigger the function on the
- * leading edge, instead of the trailing. The function also has a property 'clear' 
- * that is a function which will clear the timer to prevent previously scheduled executions. 
- *
- * @source underscore.js
- * @see http://unscriptable.com/2009/03/20/debouncing-javascript-methods/
- * @param {Function} function to wrap
- * @param {Number} timeout in ms (`100`)
- * @param {Boolean} whether to execute at the beginning (`false`)
- * @api public
- */
-
-module.exports = function debounce(func, wait, immediate){
-  var timeout, args, context, timestamp, result;
-  if (null == wait) wait = 100;
-
-  function later() {
-    var last = Date.now() - timestamp;
-
-    if (last < wait && last >= 0) {
-      timeout = setTimeout(later, wait - last);
-    } else {
-      timeout = null;
-      if (!immediate) {
-        result = func.apply(context, args);
-        context = args = null;
-      }
-    }
-  };
-
-  var debounced = function(){
-    context = this;
-    args = arguments;
-    timestamp = Date.now();
-    var callNow = immediate && !timeout;
-    if (!timeout) timeout = setTimeout(later, wait);
-    if (callNow) {
-      result = func.apply(context, args);
-      context = args = null;
-    }
-
-    return result;
-  };
-
-  debounced.clear = function() {
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = null;
-    }
-  };
-  
-  debounced.flush = function() {
-    if (timeout) {
-      result = func.apply(context, args);
-      context = args = null;
-      
-      clearTimeout(timeout);
-      timeout = null;
-    }
-  };
-
-  return debounced;
-};
-
-
-/***/ }),
-/* 60 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function Handle(e) {
-    if (e instanceof Error) {
-        console.error(e);
-        //@ts-ignore
-        window.top.Notify.addNotification({
-            title: 'Server Error',
-            message: 'Sorry, something went wrong when trying to communicate with the server. Please try again later.',
-            level: 'error',
-        });
-    }
-    if (e instanceof Response) {
-        e
-            .json()
-            .then((apie) => {
-            if (typeof apie.error === 'string') {
-                //@ts-ignore
-                window.top.Notify.addNotification({
-                    title: e.statusText,
-                    message: apie.error,
-                    level: 'error',
-                });
-            }
-            else {
-                //@ts-ignore
-                window.top.Notify.addNotification({
-                    title: e.statusText,
-                    message: apie.error.message,
-                    level: 'error',
-                });
-            }
-        })
-            .catch(parsee => {
-            console.error(parsee);
-            //@ts-ignore
-            window.top.Notify.addNotification({
-                title: 'Server Error',
-                message: 'Sorry, something went wrong when trying to communicate with the server. Please try again later.',
-                level: 'error',
-            });
-        });
-    }
-}
-exports.Handle = Handle;
 
 
 /***/ })
