@@ -2,8 +2,8 @@ import * as api from 'cms-client-api';
 import ndjsonStream = require('can-ndjson-stream'); // This file should be imported using the CommonJS-style
 
 export const basePath = '/api';
-export const posts = new api.PostsApi(undefined, basePath);
-export const auth = new api.AuthApi(undefined, basePath);
+export const posts = new api.PostsApi(window.fetch, basePath);
+export const auth = new api.AuthApi(window.fetch, basePath);
 
 type chunk = {
   done: boolean;
