@@ -4,8 +4,7 @@
   "description": "A simple Note App",
   "main": "dist/app.html",
   "scripts": {
-    "minify-html":
-      "prettydiff lang:'html' mode:'minify' source:'src/app.html' > dist/app.html",
+    "minify-html": "prettydiff lang:'html' mode:'minify' source:'src/app.html' > dist/app.html",
     "build": "webpack && npm run minify-html"
   },
   "author": "thurt",
