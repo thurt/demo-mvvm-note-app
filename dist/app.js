@@ -471,7 +471,7 @@ const STORE = Store('localStorage');
 function convert(prop) {
     switch (prop) {
         case 'modified':
-            return 'last_edited';
+            return 'lastEdited';
         case 'body':
             return 'content';
         default:
@@ -493,14 +493,14 @@ function Note(app, errorHandler) {
     return __awaiter(this, void 0, void 0, function* () {
         const myName = 'Post';
         const POSTS = {};
-        let access_token;
+        let accessToken;
         const updatePost = debounce(function (id, p) {
             app.run(myName, function () {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
-                        yield api_1.posts.updatePost({ id, body: p }, { headers: { Authorization: 'Bearer ' + access_token } });
-                        const pu = yield api_1.posts.getPost({ id }, { headers: { Authorization: 'Bearer ' + access_token } });
-                        POSTS[id].last_edited = pu.last_edited;
+                        yield api_1.posts.updatePost({ id, body: p }, { headers: { Authorization: 'Bearer ' + accessToken } });
+                        const pu = yield api_1.posts.getPost({ id }, { headers: { Authorization: 'Bearer ' + accessToken } });
+                        POSTS[id].lastEdited = pu.lastEdited;
                         this.emit('update_modified', id);
                     }
                     catch (e) {
@@ -513,8 +513,8 @@ function Note(app, errorHandler) {
             new() {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
-                        const res = yield api_1.posts.createPost({ body: {} }, { headers: { Authorization: 'Bearer ' + access_token } });
-                        const p = yield api_1.posts.getPost({ id: res.id }, { headers: { Authorization: 'Bearer ' + access_token } });
+                        const res = yield api_1.posts.createPost({ body: {} }, { headers: { Authorization: 'Bearer ' + accessToken } });
+                        const p = yield api_1.posts.getPost({ id: res.id }, { headers: { Authorization: 'Bearer ' + accessToken } });
                         fillUndefined(p);
                         POSTS[p.id] = p;
                         this.emit('new', p.id);
@@ -532,7 +532,7 @@ function Note(app, errorHandler) {
                 //@ts-ignore
                 const nkp = nk[cp];
                 if (nkp === undefined) {
-                    return console.warn(this.name, 'property', prop, 'for key', key, 'does not exist');
+                    return console.warn(this.name, 'property', cp, 'for key', key, 'does not exist');
                 }
                 if (typeof nkp === 'object' && nkp !== null)
                     return console.warn(this.name, 'property', prop, 'for key', key, 'is an object. Only primitives can be accessed.');
@@ -568,7 +568,7 @@ function Note(app, errorHandler) {
             delete(id) {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
-                        yield api_1.posts.deletePost({ id }, { headers: { Authorization: 'Bearer ' + access_token } });
+                        yield api_1.posts.deletePost({ id }, { headers: { Authorization: 'Bearer ' + accessToken } });
                         delete POSTS[id];
                         this.emit('delete', id);
                     }
@@ -587,15 +587,15 @@ function Note(app, errorHandler) {
             else {
                 throw "STORE.get('state') must exist";
             }
-            access_token = s.authUser && s.authUser.access_token;
-            if (!access_token) {
-                throw 'state.authUser.access_token must exist';
+            accessToken = s.authUser && s.authUser.accessToken;
+            if (!accessToken) {
+                throw 'state.authUser.accessToken must exist';
             }
             yield api_1.streamRequest(api_1.basePath + '/posts?includeUnPublished=true', (pc) => {
                 const p = pc.result;
                 fillUndefined(p);
                 POSTS[p.id] = p;
-            }, { headers: { Authorization: 'Bearer ' + access_token } });
+            }, { headers: { Authorization: 'Bearer ' + accessToken } });
         }
         catch (e) {
             errorHandler(e);
@@ -711,7 +711,6 @@ exports.streamRequest = streamRequest;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
 /**
  * CMS
  * CMS Service API provides access to CMS entities and supports CMS use-cases
@@ -723,22 +722,17 @@ exports.streamRequest = streamRequest;
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
+
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var url = __webpack_require__(17);
 var isomorphicFetch = __webpack_require__(25);
 var assign = __webpack_require__(27);
-var BASE_PATH = 'https://learned-stone-189802.appspot.com/api'.replace(/\/+$/, '');
-var BaseAPI = /** @class */ (function () {
+var BASE_PATH = "https://learned-stone-189802.appspot.com/api".replace(/\/+$/, "");
+var BaseAPI = (function () {
     function BaseAPI(fetch, basePath) {
         if (fetch === void 0) { fetch = isomorphicFetch; }
         if (basePath === void 0) { basePath = BASE_PATH; }
@@ -748,27 +742,54 @@ var BaseAPI = /** @class */ (function () {
     return BaseAPI;
 }());
 exports.BaseAPI = BaseAPI;
+;
 /**
  * AuthApi - fetch parameter creator
  */
 exports.AuthApiFetchParamCreator = {
     /**
      *
-     * @summary Authorize as a user to get an access token
+     * @summary Authenticate as an existing user to get an access token
      * @param body
      */
     authUser: function (params, options) {
         // verify required parameter "body" is set
-        if (params['body'] == null) {
-            throw new Error('Missing required parameter body when calling authUser');
+        if (params["body"] == null) {
+            throw new Error("Missing required parameter body when calling authUser");
         }
         var baseUrl = "/auth/user";
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'POST' }, options);
+        var fetchOptions = assign({}, { method: "POST" }, options);
         var contentTypeHeader = {};
-        contentTypeHeader = { 'Content-Type': 'application/json' };
-        if (params['body']) {
-            fetchOptions.body = JSON.stringify(params['body'] || {});
+        contentTypeHeader = { "Content-Type": "application/json" };
+        if (params["body"]) {
+            fetchOptions.body = JSON.stringify(params["body"] || {});
+        }
+        if (contentTypeHeader) {
+            fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+    /**
+     *
+     * @summary Logout deactivates the provided access token
+     * @param body
+     */
+    logout: function (params, options) {
+        // verify required parameter "body" is set
+        if (params["body"] == null) {
+            throw new Error("Missing required parameter body when calling logout");
+        }
+        var baseUrl = "/auth/user/logout";
+        var urlObj = url.parse(baseUrl, true);
+        var fetchOptions = assign({}, { method: "POST" }, options);
+        var contentTypeHeader = {};
+        contentTypeHeader = { "Content-Type": "application/json" };
+        if (params["body"]) {
+            fetchOptions.body = JSON.stringify(params["body"] || {});
         }
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -785,7 +806,7 @@ exports.AuthApiFetchParamCreator = {
 exports.AuthApiFp = {
     /**
      *
-     * @summary Authorize as a user to get an access token
+     * @summary Authenticate as an existing user to get an access token
      * @param body
      */
     authUser: function (params, options) {
@@ -803,26 +824,55 @@ exports.AuthApiFp = {
             });
         };
     },
+    /**
+     *
+     * @summary Logout deactivates the provided access token
+     * @param body
+     */
+    logout: function (params, options) {
+        var fetchArgs = exports.AuthApiFetchParamCreator.logout(params, options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
 };
 /**
  * AuthApi - object-oriented interface
  */
-var AuthApi = /** @class */ (function (_super) {
+var AuthApi = (function (_super) {
     __extends(AuthApi, _super);
     function AuthApi() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     /**
      *
-     * @summary Authorize as a user to get an access token
+     * @summary Authenticate as an existing user to get an access token
      * @param body
      */
     AuthApi.prototype.authUser = function (params, options) {
         return exports.AuthApiFp.authUser(params, options)(this.fetch, this.basePath);
     };
+    /**
+     *
+     * @summary Logout deactivates the provided access token
+     * @param body
+     */
+    AuthApi.prototype.logout = function (params, options) {
+        return exports.AuthApiFp.logout(params, options)(this.fetch, this.basePath);
+    };
     return AuthApi;
 }(BaseAPI));
 exports.AuthApi = AuthApi;
+;
 /**
  * AuthApi - factory interface
  */
@@ -830,11 +880,19 @@ exports.AuthApiFactory = function (fetch, basePath) {
     return {
         /**
          *
-         * @summary Authorize as a user to get an access token
+         * @summary Authenticate as an existing user to get an access token
          * @param body
          */
         authUser: function (params, options) {
             return exports.AuthApiFp.authUser(params, options)(fetch, basePath);
+        },
+        /**
+         *
+         * @summary Logout deactivates the provided access token
+         * @param body
+         */
+        logout: function (params, options) {
+            return exports.AuthApiFp.logout(params, options)(fetch, basePath);
         },
     };
 };
@@ -849,16 +907,16 @@ exports.CommentsApiFetchParamCreator = {
      */
     createComment: function (params, options) {
         // verify required parameter "body" is set
-        if (params['body'] == null) {
-            throw new Error('Missing required parameter body when calling createComment');
+        if (params["body"] == null) {
+            throw new Error("Missing required parameter body when calling createComment");
         }
         var baseUrl = "/comments";
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'POST' }, options);
+        var fetchOptions = assign({}, { method: "POST" }, options);
         var contentTypeHeader = {};
-        contentTypeHeader = { 'Content-Type': 'application/json' };
-        if (params['body']) {
-            fetchOptions.body = JSON.stringify(params['body'] || {});
+        contentTypeHeader = { "Content-Type": "application/json" };
+        if (params["body"]) {
+            fetchOptions.body = JSON.stringify(params["body"] || {});
         }
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -875,12 +933,13 @@ exports.CommentsApiFetchParamCreator = {
      */
     deleteComment: function (params, options) {
         // verify required parameter "id" is set
-        if (params['id'] == null) {
-            throw new Error('Missing required parameter id when calling deleteComment');
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling deleteComment");
         }
-        var baseUrl = "/comments/{id}".replace("{" + 'id' + "}", "" + params['id']);
+        var baseUrl = "/comments/{id}"
+            .replace("{" + "id" + "}", "" + params["id"]);
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'DELETE' }, options);
+        var fetchOptions = assign({}, { method: "DELETE" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -897,12 +956,13 @@ exports.CommentsApiFetchParamCreator = {
      */
     getComment: function (params, options) {
         // verify required parameter "id" is set
-        if (params['id'] == null) {
-            throw new Error('Missing required parameter id when calling getComment');
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling getComment");
         }
-        var baseUrl = "/comments/{id}".replace("{" + 'id' + "}", "" + params['id']);
+        var baseUrl = "/comments/{id}"
+            .replace("{" + "id" + "}", "" + params["id"]);
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'GET' }, options);
+        var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -919,7 +979,7 @@ exports.CommentsApiFetchParamCreator = {
     getComments: function (options) {
         var baseUrl = "/comments";
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'GET' }, options);
+        var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -937,20 +997,21 @@ exports.CommentsApiFetchParamCreator = {
      */
     updateComment: function (params, options) {
         // verify required parameter "id" is set
-        if (params['id'] == null) {
-            throw new Error('Missing required parameter id when calling updateComment');
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling updateComment");
         }
         // verify required parameter "body" is set
-        if (params['body'] == null) {
-            throw new Error('Missing required parameter body when calling updateComment');
+        if (params["body"] == null) {
+            throw new Error("Missing required parameter body when calling updateComment");
         }
-        var baseUrl = "/comments/{id}".replace("{" + 'id' + "}", "" + params['id']);
+        var baseUrl = "/comments/{id}"
+            .replace("{" + "id" + "}", "" + params["id"]);
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'PUT' }, options);
+        var fetchOptions = assign({}, { method: "PUT" }, options);
         var contentTypeHeader = {};
-        contentTypeHeader = { 'Content-Type': 'application/json' };
-        if (params['body']) {
-            fetchOptions.body = JSON.stringify(params['body'] || {});
+        contentTypeHeader = { "Content-Type": "application/json" };
+        if (params["body"]) {
+            fetchOptions.body = JSON.stringify(params["body"] || {});
         }
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1069,10 +1130,10 @@ exports.CommentsApiFp = {
 /**
  * CommentsApi - object-oriented interface
  */
-var CommentsApi = /** @class */ (function (_super) {
+var CommentsApi = (function (_super) {
     __extends(CommentsApi, _super);
     function CommentsApi() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     /**
      *
@@ -1117,6 +1178,7 @@ var CommentsApi = /** @class */ (function (_super) {
     return CommentsApi;
 }(BaseAPI));
 exports.CommentsApi = CommentsApi;
+;
 /**
  * CommentsApi - factory interface
  */
@@ -1175,16 +1237,16 @@ exports.PostsApiFetchParamCreator = {
      */
     createPost: function (params, options) {
         // verify required parameter "body" is set
-        if (params['body'] == null) {
-            throw new Error('Missing required parameter body when calling createPost');
+        if (params["body"] == null) {
+            throw new Error("Missing required parameter body when calling createPost");
         }
         var baseUrl = "/posts";
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'POST' }, options);
+        var fetchOptions = assign({}, { method: "POST" }, options);
         var contentTypeHeader = {};
-        contentTypeHeader = { 'Content-Type': 'application/json' };
-        if (params['body']) {
-            fetchOptions.body = JSON.stringify(params['body'] || {});
+        contentTypeHeader = { "Content-Type": "application/json" };
+        if (params["body"]) {
+            fetchOptions.body = JSON.stringify(params["body"] || {});
         }
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1201,12 +1263,13 @@ exports.PostsApiFetchParamCreator = {
      */
     deletePost: function (params, options) {
         // verify required parameter "id" is set
-        if (params['id'] == null) {
-            throw new Error('Missing required parameter id when calling deletePost');
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling deletePost");
         }
-        var baseUrl = "/posts/{id}".replace("{" + 'id' + "}", "" + params['id']);
+        var baseUrl = "/posts/{id}"
+            .replace("{" + "id" + "}", "" + params["id"]);
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'DELETE' }, options);
+        var fetchOptions = assign({}, { method: "DELETE" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1223,12 +1286,13 @@ exports.PostsApiFetchParamCreator = {
      */
     getPost: function (params, options) {
         // verify required parameter "id" is set
-        if (params['id'] == null) {
-            throw new Error('Missing required parameter id when calling getPost');
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling getPost");
         }
-        var baseUrl = "/posts/{id}".replace("{" + 'id' + "}", "" + params['id']);
+        var baseUrl = "/posts/{id}"
+            .replace("{" + "id" + "}", "" + params["id"]);
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'GET' }, options);
+        var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1245,12 +1309,13 @@ exports.PostsApiFetchParamCreator = {
      */
     getPostBySlug: function (params, options) {
         // verify required parameter "slug" is set
-        if (params['slug'] == null) {
-            throw new Error('Missing required parameter slug when calling getPostBySlug');
+        if (params["slug"] == null) {
+            throw new Error("Missing required parameter slug when calling getPostBySlug");
         }
-        var baseUrl = "/posts/slug/{slug}".replace("{" + 'slug' + "}", "" + params['slug']);
+        var baseUrl = "/posts/slug/{slug}"
+            .replace("{" + "slug" + "}", "" + params["slug"]);
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'GET' }, options);
+        var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1267,12 +1332,13 @@ exports.PostsApiFetchParamCreator = {
      */
     getPostComments: function (params, options) {
         // verify required parameter "id" is set
-        if (params['id'] == null) {
-            throw new Error('Missing required parameter id when calling getPostComments');
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling getPostComments");
         }
-        var baseUrl = "/posts/{id}/comments".replace("{" + 'id' + "}", "" + params['id']);
+        var baseUrl = "/posts/{id}/comments"
+            .replace("{" + "id" + "}", "" + params["id"]);
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'GET' }, options);
+        var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1291,9 +1357,9 @@ exports.PostsApiFetchParamCreator = {
         var baseUrl = "/posts";
         var urlObj = url.parse(baseUrl, true);
         urlObj.query = assign({}, urlObj.query, {
-            includeUnPublished: params['includeUnPublished'],
+            "includeUnPublished": params["includeUnPublished"],
         });
-        var fetchOptions = assign({}, { method: 'GET' }, options);
+        var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1311,20 +1377,21 @@ exports.PostsApiFetchParamCreator = {
      */
     updatePost: function (params, options) {
         // verify required parameter "id" is set
-        if (params['id'] == null) {
-            throw new Error('Missing required parameter id when calling updatePost');
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling updatePost");
         }
         // verify required parameter "body" is set
-        if (params['body'] == null) {
-            throw new Error('Missing required parameter body when calling updatePost');
+        if (params["body"] == null) {
+            throw new Error("Missing required parameter body when calling updatePost");
         }
-        var baseUrl = "/posts/{id}".replace("{" + 'id' + "}", "" + params['id']);
+        var baseUrl = "/posts/{id}"
+            .replace("{" + "id" + "}", "" + params["id"]);
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'PUT' }, options);
+        var fetchOptions = assign({}, { method: "PUT" }, options);
         var contentTypeHeader = {};
-        contentTypeHeader = { 'Content-Type': 'application/json' };
-        if (params['body']) {
-            fetchOptions.body = JSON.stringify(params['body'] || {});
+        contentTypeHeader = { "Content-Type": "application/json" };
+        if (params["body"]) {
+            fetchOptions.body = JSON.stringify(params["body"] || {});
         }
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1484,10 +1551,10 @@ exports.PostsApiFp = {
 /**
  * PostsApi - object-oriented interface
  */
-var PostsApi = /** @class */ (function (_super) {
+var PostsApi = (function (_super) {
     __extends(PostsApi, _super);
     function PostsApi() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     /**
      *
@@ -1549,6 +1616,7 @@ var PostsApi = /** @class */ (function (_super) {
     return PostsApi;
 }(BaseAPI));
 exports.PostsApi = PostsApi;
+;
 /**
  * PostsApi - factory interface
  */
@@ -1614,6 +1682,159 @@ exports.PostsApiFactory = function (fetch, basePath) {
     };
 };
 /**
+ * RegisterApi - fetch parameter creator
+ */
+exports.RegisterApiFetchParamCreator = {
+    /**
+     *
+     * @summary Register for a new user account in order to receive an email with a new user authentication token
+     * @param body
+     */
+    registerNewUser: function (params, options) {
+        // verify required parameter "body" is set
+        if (params["body"] == null) {
+            throw new Error("Missing required parameter body when calling registerNewUser");
+        }
+        var baseUrl = "/register/user/0";
+        var urlObj = url.parse(baseUrl, true);
+        var fetchOptions = assign({}, { method: "POST" }, options);
+        var contentTypeHeader = {};
+        contentTypeHeader = { "Content-Type": "application/json" };
+        if (params["body"]) {
+            fetchOptions.body = JSON.stringify(params["body"] || {});
+        }
+        if (contentTypeHeader) {
+            fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+    /**
+     *
+     * @summary Verify ownership of your email address in order to finish creating your new user account
+     * @param body
+     */
+    verifyNewUser: function (params, options) {
+        // verify required parameter "body" is set
+        if (params["body"] == null) {
+            throw new Error("Missing required parameter body when calling verifyNewUser");
+        }
+        var baseUrl = "/register/user/1";
+        var urlObj = url.parse(baseUrl, true);
+        var fetchOptions = assign({}, { method: "POST" }, options);
+        var contentTypeHeader = {};
+        contentTypeHeader = { "Content-Type": "application/json" };
+        if (params["body"]) {
+            fetchOptions.body = JSON.stringify(params["body"] || {});
+        }
+        if (contentTypeHeader) {
+            fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+};
+/**
+ * RegisterApi - functional programming interface
+ */
+exports.RegisterApiFp = {
+    /**
+     *
+     * @summary Register for a new user account in order to receive an email with a new user authentication token
+     * @param body
+     */
+    registerNewUser: function (params, options) {
+        var fetchArgs = exports.RegisterApiFetchParamCreator.registerNewUser(params, options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
+    /**
+     *
+     * @summary Verify ownership of your email address in order to finish creating your new user account
+     * @param body
+     */
+    verifyNewUser: function (params, options) {
+        var fetchArgs = exports.RegisterApiFetchParamCreator.verifyNewUser(params, options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
+};
+/**
+ * RegisterApi - object-oriented interface
+ */
+var RegisterApi = (function (_super) {
+    __extends(RegisterApi, _super);
+    function RegisterApi() {
+        _super.apply(this, arguments);
+    }
+    /**
+     *
+     * @summary Register for a new user account in order to receive an email with a new user authentication token
+     * @param body
+     */
+    RegisterApi.prototype.registerNewUser = function (params, options) {
+        return exports.RegisterApiFp.registerNewUser(params, options)(this.fetch, this.basePath);
+    };
+    /**
+     *
+     * @summary Verify ownership of your email address in order to finish creating your new user account
+     * @param body
+     */
+    RegisterApi.prototype.verifyNewUser = function (params, options) {
+        return exports.RegisterApiFp.verifyNewUser(params, options)(this.fetch, this.basePath);
+    };
+    return RegisterApi;
+}(BaseAPI));
+exports.RegisterApi = RegisterApi;
+;
+/**
+ * RegisterApi - factory interface
+ */
+exports.RegisterApiFactory = function (fetch, basePath) {
+    return {
+        /**
+         *
+         * @summary Register for a new user account in order to receive an email with a new user authentication token
+         * @param body
+         */
+        registerNewUser: function (params, options) {
+            return exports.RegisterApiFp.registerNewUser(params, options)(fetch, basePath);
+        },
+        /**
+         *
+         * @summary Verify ownership of your email address in order to finish creating your new user account
+         * @param body
+         */
+        verifyNewUser: function (params, options) {
+            return exports.RegisterApiFp.verifyNewUser(params, options)(fetch, basePath);
+        },
+    };
+};
+/**
  * SetupApi - fetch parameter creator
  */
 exports.SetupApiFetchParamCreator = {
@@ -1624,7 +1845,7 @@ exports.SetupApiFetchParamCreator = {
     isSetup: function (options) {
         var baseUrl = "/is-setup";
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'GET' }, options);
+        var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1641,16 +1862,16 @@ exports.SetupApiFetchParamCreator = {
      */
     setup: function (params, options) {
         // verify required parameter "body" is set
-        if (params['body'] == null) {
-            throw new Error('Missing required parameter body when calling setup');
+        if (params["body"] == null) {
+            throw new Error("Missing required parameter body when calling setup");
         }
         var baseUrl = "/setup";
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'POST' }, options);
+        var fetchOptions = assign({}, { method: "POST" }, options);
         var contentTypeHeader = {};
-        contentTypeHeader = { 'Content-Type': 'application/json' };
-        if (params['body']) {
-            fetchOptions.body = JSON.stringify(params['body'] || {});
+        contentTypeHeader = { "Content-Type": "application/json" };
+        if (params["body"]) {
+            fetchOptions.body = JSON.stringify(params["body"] || {});
         }
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1708,10 +1929,10 @@ exports.SetupApiFp = {
 /**
  * SetupApi - object-oriented interface
  */
-var SetupApi = /** @class */ (function (_super) {
+var SetupApi = (function (_super) {
     __extends(SetupApi, _super);
     function SetupApi() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     /**
      *
@@ -1731,6 +1952,7 @@ var SetupApi = /** @class */ (function (_super) {
     return SetupApi;
 }(BaseAPI));
 exports.SetupApi = SetupApi;
+;
 /**
  * SetupApi - factory interface
  */
@@ -1759,43 +1981,18 @@ exports.SetupApiFactory = function (fetch, basePath) {
 exports.UsersApiFetchParamCreator = {
     /**
      *
-     * @summary Create a user
-     * @param body
-     */
-    createUser: function (params, options) {
-        // verify required parameter "body" is set
-        if (params['body'] == null) {
-            throw new Error('Missing required parameter body when calling createUser');
-        }
-        var baseUrl = "/users";
-        var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'POST' }, options);
-        var contentTypeHeader = {};
-        contentTypeHeader = { 'Content-Type': 'application/json' };
-        if (params['body']) {
-            fetchOptions.body = JSON.stringify(params['body'] || {});
-        }
-        if (contentTypeHeader) {
-            fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
-        }
-        return {
-            url: url.format(urlObj),
-            options: fetchOptions,
-        };
-    },
-    /**
-     *
      * @summary Delete a user
      * @param id
      */
     deleteUser: function (params, options) {
         // verify required parameter "id" is set
-        if (params['id'] == null) {
-            throw new Error('Missing required parameter id when calling deleteUser');
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling deleteUser");
         }
-        var baseUrl = "/users/{id}".replace("{" + 'id' + "}", "" + params['id']);
+        var baseUrl = "/users/{id}"
+            .replace("{" + "id" + "}", "" + params["id"]);
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'DELETE' }, options);
+        var fetchOptions = assign({}, { method: "DELETE" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1812,12 +2009,13 @@ exports.UsersApiFetchParamCreator = {
      */
     getUser: function (params, options) {
         // verify required parameter "id" is set
-        if (params['id'] == null) {
-            throw new Error('Missing required parameter id when calling getUser');
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling getUser");
         }
-        var baseUrl = "/users/{id}".replace("{" + 'id' + "}", "" + params['id']);
+        var baseUrl = "/users/{id}"
+            .replace("{" + "id" + "}", "" + params["id"]);
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'GET' }, options);
+        var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1834,12 +2032,13 @@ exports.UsersApiFetchParamCreator = {
      */
     getUserComments: function (params, options) {
         // verify required parameter "id" is set
-        if (params['id'] == null) {
-            throw new Error('Missing required parameter id when calling getUserComments');
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling getUserComments");
         }
-        var baseUrl = "/users/{id}/comments".replace("{" + 'id' + "}", "" + params['id']);
+        var baseUrl = "/users/{id}/comments"
+            .replace("{" + "id" + "}", "" + params["id"]);
         var urlObj = url.parse(baseUrl, true);
-        var fetchOptions = assign({}, { method: 'GET' }, options);
+        var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
             fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
@@ -1854,26 +2053,6 @@ exports.UsersApiFetchParamCreator = {
  * UsersApi - functional programming interface
  */
 exports.UsersApiFp = {
-    /**
-     *
-     * @summary Create a user
-     * @param body
-     */
-    createUser: function (params, options) {
-        var fetchArgs = exports.UsersApiFetchParamCreator.createUser(params, options);
-        return function (fetch, basePath) {
-            if (fetch === void 0) { fetch = isomorphicFetch; }
-            if (basePath === void 0) { basePath = BASE_PATH; }
-            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
-                if (response.status >= 200 && response.status < 300) {
-                    return response.json();
-                }
-                else {
-                    throw response;
-                }
-            });
-        };
-    },
     /**
      *
      * @summary Delete a user
@@ -1938,19 +2117,11 @@ exports.UsersApiFp = {
 /**
  * UsersApi - object-oriented interface
  */
-var UsersApi = /** @class */ (function (_super) {
+var UsersApi = (function (_super) {
     __extends(UsersApi, _super);
     function UsersApi() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
-    /**
-     *
-     * @summary Create a user
-     * @param body
-     */
-    UsersApi.prototype.createUser = function (params, options) {
-        return exports.UsersApiFp.createUser(params, options)(this.fetch, this.basePath);
-    };
     /**
      *
      * @summary Delete a user
@@ -1978,19 +2149,12 @@ var UsersApi = /** @class */ (function (_super) {
     return UsersApi;
 }(BaseAPI));
 exports.UsersApi = UsersApi;
+;
 /**
  * UsersApi - factory interface
  */
 exports.UsersApiFactory = function (fetch, basePath) {
     return {
-        /**
-         *
-         * @summary Create a user
-         * @param body
-         */
-        createUser: function (params, options) {
-            return exports.UsersApiFp.createUser(params, options)(fetch, basePath);
-        },
         /**
          *
          * @summary Delete a user

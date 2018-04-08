@@ -22,7 +22,7 @@ type PostChunk = {result: CmsPost};
 function convert(prop: string): string {
   switch (prop) {
     case 'modified':
-      return 'last_edited';
+      return 'lastEdited';
     case 'body':
       return 'content';
     default:
@@ -48,7 +48,7 @@ export default async function Note(
 ): Promise<string> {
   const myName = 'Post';
   const POSTS: {[id: string]: CmsPost} = {};
-  let access_token: string;
+  let accessToken: string;
 
   const updatePost = debounce(
     function(id: number, p: CmsUpdatePostRequest) {
@@ -56,13 +56,13 @@ export default async function Note(
         try {
           await posts.updatePost(
             {id, body: p},
-            {headers: {Authorization: 'Bearer ' + access_token}},
+            {headers: {Authorization: 'Bearer ' + accessToken}},
           );
           const pu = await posts.getPost(
             {id},
-            {headers: {Authorization: 'Bearer ' + access_token}},
+            {headers: {Authorization: 'Bearer ' + accessToken}},
           );
-          POSTS[id].last_edited = pu.last_edited;
+          POSTS[id].lastEdited = pu.lastEdited;
           this.emit('update_modified', id);
         } catch (e) {
           errorHandler(e);
@@ -78,11 +78,11 @@ export default async function Note(
       try {
         const res = await posts.createPost(
           {body: {}},
-          {headers: {Authorization: 'Bearer ' + access_token}},
+          {headers: {Authorization: 'Bearer ' + accessToken}},
         );
         const p = await posts.getPost(
           {id: res.id},
-          {headers: {Authorization: 'Bearer ' + access_token}},
+          {headers: {Authorization: 'Bearer ' + accessToken}},
         );
         fillUndefined(p);
         POSTS[p.id] = p;
@@ -102,7 +102,7 @@ export default async function Note(
         return console.warn(
           this.name,
           'property',
-          prop,
+          cp,
           'for key',
           key,
           'does not exist',
@@ -158,7 +158,7 @@ export default async function Note(
       try {
         await posts.deletePost(
           {id},
-          {headers: {Authorization: 'Bearer ' + access_token}},
+          {headers: {Authorization: 'Bearer ' + accessToken}},
         );
         delete POSTS[id];
         this.emit('delete', id);
@@ -176,9 +176,9 @@ export default async function Note(
     } else {
       throw "STORE.get('state') must exist";
     }
-    access_token = s.authUser && s.authUser.access_token;
-    if (!access_token) {
-      throw 'state.authUser.access_token must exist';
+    accessToken = s.authUser && s.authUser.accessToken;
+    if (!accessToken) {
+      throw 'state.authUser.accessToken must exist';
     }
     await streamRequest(
       basePath + '/posts?includeUnPublished=true',
@@ -187,7 +187,7 @@ export default async function Note(
         fillUndefined(p);
         POSTS[p.id] = p;
       },
-      {headers: {Authorization: 'Bearer ' + access_token}},
+      {headers: {Authorization: 'Bearer ' + accessToken}},
     );
   } catch (e) {
     errorHandler(e);
