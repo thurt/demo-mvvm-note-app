@@ -4,6 +4,10 @@ export default function Detail(
   myName: string,
   myModel: string,
   app: ViewModel.Interface,
+  simpleMDE: {
+    value: (v: any) => any;
+    codemirror: {on: (str: string, fn: (a: any) => void) => void};
+  },
 ) {
   const myView = document.getElementById('Detail');
   const myData = Object.create(null);
@@ -20,38 +24,43 @@ export default function Detail(
     myData[e.dataset.name] = e;
   }
 
+  myView.querySelector('[data-name="title"]').addEventListener(
+    'input',
+    function(e: Event) {
+      e.stopPropagation();
+      app.run(
+        myModel,
+        function(el) {
+          this.update(myKey, {title: el.innerText});
+        },
+        e.target,
+      );
+    },
+    true,
+  );
+  myView.querySelector('[data-name="published"]').addEventListener(
+    'click',
+    function(e: Event) {
+      e.stopPropagation();
+      app.run(
+        myModel,
+        function(el) {
+          if (el instanceof HTMLInputElement) {
+            this.update(myKey, {published: el.checked});
+          }
+        },
+        e.target,
+      );
+    },
+    true,
+  );
+  simpleMDE.codemirror.on('change', function() {
+    app.run(myModel, function() {
+      this.update(myKey, {body: simpleMDE.value(undefined)});
+    });
+  });
+
   let myKey: string = null;
-
-  function input(e: Event) {
-    e.stopPropagation();
-    app.run(myModel, _input, e.target);
-  }
-
-  function _input(target: HTMLElement) {
-    switch (target.dataset.name) {
-      case 'title':
-        this.update(myKey, {[target.dataset.name]: target.innerText});
-        break;
-      case 'body':
-        this.update(myKey, {[target.dataset.name]: target.innerHTML});
-        break;
-      case 'published':
-        if (target instanceof HTMLInputElement) {
-          this.update(myKey, {[target.dataset.name]: target.checked});
-          break;
-        }
-      default:
-        console.warn(
-          myName,
-          ': this view-model does not recognize dataset name',
-          target.dataset.name,
-        );
-        break;
-    }
-  }
-
-  myView.addEventListener('input', input, true);
-  myView.addEventListener('click', input, true);
 
   myData['title'].addEventListener('keydown', function(e: KeyboardEvent) {
     if (e.keyCode === 13) {
@@ -82,6 +91,11 @@ export default function Detail(
     [myName + 'set'](key) {
       clearSelections();
       myKey = key;
+      // make sure this is above simpleMDE.value() call because it will not render the MDE value correctly if it is not already visible
+      if (myView.classList.contains('hidden')) {
+        myView.classList.remove('hidden');
+        myEmpty.classList.add('hidden');
+      }
       for (let name in myData) {
         let value = this.get(myKey, name);
         if (name === 'created' || name === 'modified') {
@@ -90,14 +104,11 @@ export default function Detail(
         } else if (name === 'published') {
           myData[name].checked = value;
           setPublishedDisabledState(this.get(myKey, 'title'));
-        } else {
+        } else if (name === 'title') {
           myData[name].innerHTML = value;
+        } else if (name === 'body') {
+          simpleMDE.value(value);
         }
-      }
-
-      if (myView.classList.contains('hidden')) {
-        myView.classList.remove('hidden');
-        myEmpty.classList.add('hidden');
       }
     },
     [myName + 'clear']() {
