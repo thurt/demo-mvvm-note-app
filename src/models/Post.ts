@@ -37,9 +37,6 @@ function fillUndefined(p: CmsPost): void {
   if (p.content === undefined) {
     p.content = '';
   }
-  if (p.published === undefined) {
-    p.published = false;
-  }
 }
 
 export default async function Note(

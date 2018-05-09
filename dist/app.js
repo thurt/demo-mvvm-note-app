@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -111,34 +111,24 @@ module.exports = function (exec) {
 /* 4 */
 /***/ (function(module, exports) {
 
-var core = module.exports = { version: '2.5.5' };
+var core = module.exports = { version: '2.5.3' };
 if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
 
 
 /***/ }),
 /* 5 */
-/***/ (function(module, exports) {
-
-var hasOwnProperty = {}.hasOwnProperty;
-module.exports = function (it, key) {
-  return hasOwnProperty.call(it, key);
-};
-
-
-/***/ }),
-/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // to indexed object, toObject with fallback for non-array-like ES3 strings
-var IObject = __webpack_require__(7);
-var defined = __webpack_require__(8);
+var IObject = __webpack_require__(6);
+var defined = __webpack_require__(7);
 module.exports = function (it) {
   return IObject(defined(it));
 };
 
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
@@ -150,7 +140,7 @@ module.exports = Object('z').propertyIsEnumerable(0) ? Object : function (it) {
 
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports) {
 
 // 7.2.1 RequireObjectCoercible(argument)
@@ -161,7 +151,7 @@ module.exports = function (it) {
 
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports) {
 
 // 7.1.4 ToInteger
@@ -173,14 +163,14 @@ module.exports = function (it) {
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const ViewModel = __webpack_require__(11);
-const Post_1 = __webpack_require__(14);
+const ViewModel = __webpack_require__(10);
+const Post_1 = __webpack_require__(13);
 const Toolbar_1 = __webpack_require__(57);
 const Detail_1 = __webpack_require__(58);
 const List_1 = __webpack_require__(59);
@@ -221,12 +211,12 @@ Post_1.default(MyViewModel, window.errorHandler)
 
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const EventRouter = __webpack_require__(12)
+const EventRouter = __webpack_require__(11)
 
 module.exports = function ViewModel(shouldLogEvents) {
   const R = EventRouter(shouldLogEvents) // router
@@ -330,12 +320,12 @@ module.exports = function ViewModel(shouldLogEvents) {
 }
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const copyObjectGraph = __webpack_require__(13)
+const copyObjectGraph = __webpack_require__(12)
 const myName = 'EventRouter'
 
 function EventRouter(shouldLogCalls) {
@@ -449,7 +439,7 @@ function _remove(t, k, cb, o) {
 }
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports) {
 
 /*
@@ -484,7 +474,7 @@ function copyObjectGraph(obj) {
 module.exports = copyObjectGraph
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -498,8 +488,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Store = __webpack_require__(15);
-const api_1 = __webpack_require__(16);
+const Store = __webpack_require__(14);
+const api_1 = __webpack_require__(15);
 const debounce = __webpack_require__(56);
 const STORE = Store('localStorage');
 function convert(prop) {
@@ -518,9 +508,6 @@ function fillUndefined(p) {
     }
     if (p.content === undefined) {
         p.content = '';
-    }
-    if (p.published === undefined) {
-        p.published = false;
     }
 }
 function Note(app, errorHandler) {
@@ -641,7 +628,7 @@ exports.default = Note;
 
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -701,7 +688,7 @@ function StorageManager(type) {
 module.exports = StorageManager
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -715,7 +702,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const api = __webpack_require__(17);
+const api = __webpack_require__(16);
 const ndjsonStream = __webpack_require__(54); // This file should be imported using the CommonJS-style
 exports.basePath = '/api';
 exports.posts = new api.PostsApi(window.fetch, exports.basePath);
@@ -741,7 +728,7 @@ exports.streamRequest = streamRequest;
 
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -762,9 +749,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var url = __webpack_require__(18);
-var isomorphicFetch = __webpack_require__(26);
-var assign = __webpack_require__(28);
+var url = __webpack_require__(17);
+var isomorphicFetch = __webpack_require__(25);
+var assign = __webpack_require__(27);
 var BASE_PATH = "https://learned-stone-189802.appspot.com/api".replace(/\/+$/, "");
 var BaseAPI = (function () {
     function BaseAPI(fetch, basePath) {
@@ -1385,14 +1372,73 @@ exports.PostsApiFetchParamCreator = {
     /**
      *
      * @summary Get all posts
-     * @param includeUnPublished when true, includes unpublished Posts in response (note: Authorization token with ADMIN role is required).
      */
-    getPosts: function (params, options) {
+    getPosts: function (options) {
         var baseUrl = "/posts";
         var urlObj = url.parse(baseUrl, true);
-        urlObj.query = assign({}, urlObj.query, {
-            "includeUnPublished": params["includeUnPublished"],
-        });
+        var fetchOptions = assign({}, { method: "GET" }, options);
+        var contentTypeHeader = {};
+        if (contentTypeHeader) {
+            fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+    /**
+     *
+     * @summary Get an unpublished post
+     * @param id
+     */
+    getUnpublishedPost: function (params, options) {
+        // verify required parameter "id" is set
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling getUnpublishedPost");
+        }
+        var baseUrl = "/unpublished-posts/{id}"
+            .replace("{" + "id" + "}", "" + params["id"]);
+        var urlObj = url.parse(baseUrl, true);
+        var fetchOptions = assign({}, { method: "GET" }, options);
+        var contentTypeHeader = {};
+        if (contentTypeHeader) {
+            fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+    /**
+     *
+     * @summary Get an unpublished post (by slug)
+     * @param slug
+     */
+    getUnpublishedPostBySlug: function (params, options) {
+        // verify required parameter "slug" is set
+        if (params["slug"] == null) {
+            throw new Error("Missing required parameter slug when calling getUnpublishedPostBySlug");
+        }
+        var baseUrl = "/unpublished-posts/slug/{slug}"
+            .replace("{" + "slug" + "}", "" + params["slug"]);
+        var urlObj = url.parse(baseUrl, true);
+        var fetchOptions = assign({}, { method: "GET" }, options);
+        var contentTypeHeader = {};
+        if (contentTypeHeader) {
+            fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+    /**
+     *
+     * @summary Get all unpublished posts
+     */
+    getUnpublishedPosts: function (options) {
+        var baseUrl = "/unpublished-posts";
+        var urlObj = url.parse(baseUrl, true);
         var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
@@ -1543,10 +1589,68 @@ exports.PostsApiFp = {
     /**
      *
      * @summary Get all posts
-     * @param includeUnPublished when true, includes unpublished Posts in response (note: Authorization token with ADMIN role is required).
      */
-    getPosts: function (params, options) {
-        var fetchArgs = exports.PostsApiFetchParamCreator.getPosts(params, options);
+    getPosts: function (options) {
+        var fetchArgs = exports.PostsApiFetchParamCreator.getPosts(options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
+    /**
+     *
+     * @summary Get an unpublished post
+     * @param id
+     */
+    getUnpublishedPost: function (params, options) {
+        var fetchArgs = exports.PostsApiFetchParamCreator.getUnpublishedPost(params, options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
+    /**
+     *
+     * @summary Get an unpublished post (by slug)
+     * @param slug
+     */
+    getUnpublishedPostBySlug: function (params, options) {
+        var fetchArgs = exports.PostsApiFetchParamCreator.getUnpublishedPostBySlug(params, options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
+    /**
+     *
+     * @summary Get all unpublished posts
+     */
+    getUnpublishedPosts: function (options) {
+        var fetchArgs = exports.PostsApiFetchParamCreator.getUnpublishedPosts(options);
         return function (fetch, basePath) {
             if (fetch === void 0) { fetch = isomorphicFetch; }
             if (basePath === void 0) { basePath = BASE_PATH; }
@@ -1633,10 +1737,32 @@ var PostsApi = (function (_super) {
     /**
      *
      * @summary Get all posts
-     * @param includeUnPublished when true, includes unpublished Posts in response (note: Authorization token with ADMIN role is required).
      */
-    PostsApi.prototype.getPosts = function (params, options) {
-        return exports.PostsApiFp.getPosts(params, options)(this.fetch, this.basePath);
+    PostsApi.prototype.getPosts = function (options) {
+        return exports.PostsApiFp.getPosts(options)(this.fetch, this.basePath);
+    };
+    /**
+     *
+     * @summary Get an unpublished post
+     * @param id
+     */
+    PostsApi.prototype.getUnpublishedPost = function (params, options) {
+        return exports.PostsApiFp.getUnpublishedPost(params, options)(this.fetch, this.basePath);
+    };
+    /**
+     *
+     * @summary Get an unpublished post (by slug)
+     * @param slug
+     */
+    PostsApi.prototype.getUnpublishedPostBySlug = function (params, options) {
+        return exports.PostsApiFp.getUnpublishedPostBySlug(params, options)(this.fetch, this.basePath);
+    };
+    /**
+     *
+     * @summary Get all unpublished posts
+     */
+    PostsApi.prototype.getUnpublishedPosts = function (options) {
+        return exports.PostsApiFp.getUnpublishedPosts(options)(this.fetch, this.basePath);
     };
     /**
      *
@@ -1699,10 +1825,32 @@ exports.PostsApiFactory = function (fetch, basePath) {
         /**
          *
          * @summary Get all posts
-         * @param includeUnPublished when true, includes unpublished Posts in response (note: Authorization token with ADMIN role is required).
          */
-        getPosts: function (params, options) {
-            return exports.PostsApiFp.getPosts(params, options)(fetch, basePath);
+        getPosts: function (options) {
+            return exports.PostsApiFp.getPosts(options)(fetch, basePath);
+        },
+        /**
+         *
+         * @summary Get an unpublished post
+         * @param id
+         */
+        getUnpublishedPost: function (params, options) {
+            return exports.PostsApiFp.getUnpublishedPost(params, options)(fetch, basePath);
+        },
+        /**
+         *
+         * @summary Get an unpublished post (by slug)
+         * @param slug
+         */
+        getUnpublishedPostBySlug: function (params, options) {
+            return exports.PostsApiFp.getUnpublishedPostBySlug(params, options)(fetch, basePath);
+        },
+        /**
+         *
+         * @summary Get all unpublished posts
+         */
+        getUnpublishedPosts: function (options) {
+            return exports.PostsApiFp.getUnpublishedPosts(options)(fetch, basePath);
         },
         /**
          *
@@ -2218,7 +2366,7 @@ exports.UsersApiFactory = function (fetch, basePath) {
 
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2245,8 +2393,8 @@ exports.UsersApiFactory = function (fetch, basePath) {
 
 
 
-var punycode = __webpack_require__(19);
-var util = __webpack_require__(22);
+var punycode = __webpack_require__(18);
+var util = __webpack_require__(21);
 
 exports.parse = urlParse;
 exports.resolve = urlResolve;
@@ -2321,7 +2469,7 @@ var protocolPattern = /^([a-z0-9.+-]+:)/i,
       'gopher:': true,
       'file:': true
     },
-    querystring = __webpack_require__(23);
+    querystring = __webpack_require__(22);
 
 function urlParse(url, parseQueryString, slashesDenoteHost) {
   if (url && util.isObject(url) && url instanceof Url) return url;
@@ -2957,7 +3105,7 @@ Url.prototype.parseHost = function() {
 
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module, global) {var __WEBPACK_AMD_DEFINE_RESULT__;/*! https://mths.be/punycode v1.4.1 by @mathias */
@@ -3493,10 +3641,10 @@ Url.prototype.parseHost = function() {
 
 }(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(20)(module), __webpack_require__(21)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(19)(module), __webpack_require__(20)))
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -3524,7 +3672,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 21 */
+/* 20 */
 /***/ (function(module, exports) {
 
 var g;
@@ -3551,7 +3699,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3574,18 +3722,18 @@ module.exports = {
 
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-exports.decode = exports.parse = __webpack_require__(24);
-exports.encode = exports.stringify = __webpack_require__(25);
+exports.decode = exports.parse = __webpack_require__(23);
+exports.encode = exports.stringify = __webpack_require__(24);
 
 
 /***/ }),
-/* 24 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3676,7 +3824,7 @@ var isArray = Array.isArray || function (xs) {
 
 
 /***/ }),
-/* 25 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3768,19 +3916,19 @@ var objectKeys = Object.keys || function (obj) {
 
 
 /***/ }),
-/* 26 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // the whatwg-fetch polyfill installs the fetch() function
 // on the global object (window or self)
 //
 // Return that as the export for use in Webpack, Browserify etc.
-__webpack_require__(27);
+__webpack_require__(26);
 module.exports = self.fetch.bind(self);
 
 
 /***/ }),
-/* 27 */
+/* 26 */
 /***/ (function(module, exports) {
 
 (function(self) {
@@ -4143,10 +4291,7 @@ module.exports = self.fetch.bind(self);
 
   function parseHeaders(rawHeaders) {
     var headers = new Headers()
-    // Replace instances of \r\n and \n followed by at least one space or horizontal tab with a space
-    // https://tools.ietf.org/html/rfc7230#section-3.2
-    var preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ')
-    preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
+    rawHeaders.split(/\r?\n/).forEach(function(line) {
       var parts = line.split(':')
       var key = parts.shift().trim()
       if (key) {
@@ -4165,7 +4310,7 @@ module.exports = self.fetch.bind(self);
     }
 
     this.type = 'default'
-    this.status = options.status === undefined ? 200 : options.status
+    this.status = 'status' in options ? options.status : 200
     this.ok = this.status >= 200 && this.status < 300
     this.statusText = 'statusText' in options ? options.statusText : 'OK'
     this.headers = new Headers(options.headers)
@@ -4232,8 +4377,6 @@ module.exports = self.fetch.bind(self);
 
       if (request.credentials === 'include') {
         xhr.withCredentials = true
-      } else if (request.credentials === 'omit') {
-        xhr.withCredentials = false
       }
 
       if ('responseType' in xhr && support.blob) {
@@ -4252,32 +4395,31 @@ module.exports = self.fetch.bind(self);
 
 
 /***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(28);
+module.exports = __webpack_require__(4).Object.assign;
+
+
+/***/ }),
 /* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(29);
-module.exports = __webpack_require__(4).Object.assign;
+// 19.1.3.1 Object.assign(target, source)
+var $export = __webpack_require__(29);
+
+$export($export.S + $export.F, 'Object', { assign: __webpack_require__(39) });
 
 
 /***/ }),
 /* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
-// 19.1.3.1 Object.assign(target, source)
-var $export = __webpack_require__(30);
-
-$export($export.S + $export.F, 'Object', { assign: __webpack_require__(40) });
-
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
 var global = __webpack_require__(0);
 var core = __webpack_require__(4);
-var ctx = __webpack_require__(31);
-var hide = __webpack_require__(33);
-var has = __webpack_require__(5);
+var ctx = __webpack_require__(30);
+var hide = __webpack_require__(32);
 var PROTOTYPE = 'prototype';
 
 var $export = function (type, name, source) {
@@ -4295,7 +4437,7 @@ var $export = function (type, name, source) {
   for (key in source) {
     // contains in native
     own = !IS_FORCED && target && target[key] !== undefined;
-    if (own && has(exports, key)) continue;
+    if (own && key in exports) continue;
     // export native or passed
     out = own ? target[key] : source[key];
     // prevent global pollution for namespaces
@@ -4338,11 +4480,11 @@ module.exports = $export;
 
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // optional / simple context binding
-var aFunction = __webpack_require__(32);
+var aFunction = __webpack_require__(31);
 module.exports = function (fn, that, length) {
   aFunction(fn);
   if (that === undefined) return fn;
@@ -4364,7 +4506,7 @@ module.exports = function (fn, that, length) {
 
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports) {
 
 module.exports = function (it) {
@@ -4374,11 +4516,11 @@ module.exports = function (it) {
 
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var dP = __webpack_require__(34);
-var createDesc = __webpack_require__(39);
+var dP = __webpack_require__(33);
+var createDesc = __webpack_require__(38);
 module.exports = __webpack_require__(2) ? function (object, key, value) {
   return dP.f(object, key, createDesc(1, value));
 } : function (object, key, value) {
@@ -4388,12 +4530,12 @@ module.exports = __webpack_require__(2) ? function (object, key, value) {
 
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var anObject = __webpack_require__(35);
-var IE8_DOM_DEFINE = __webpack_require__(36);
-var toPrimitive = __webpack_require__(38);
+var anObject = __webpack_require__(34);
+var IE8_DOM_DEFINE = __webpack_require__(35);
+var toPrimitive = __webpack_require__(37);
 var dP = Object.defineProperty;
 
 exports.f = __webpack_require__(2) ? Object.defineProperty : function defineProperty(O, P, Attributes) {
@@ -4410,7 +4552,7 @@ exports.f = __webpack_require__(2) ? Object.defineProperty : function defineProp
 
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(1);
@@ -4421,16 +4563,16 @@ module.exports = function (it) {
 
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = !__webpack_require__(2) && !__webpack_require__(3)(function () {
-  return Object.defineProperty(__webpack_require__(37)('div'), 'a', { get: function () { return 7; } }).a != 7;
+  return Object.defineProperty(__webpack_require__(36)('div'), 'a', { get: function () { return 7; } }).a != 7;
 });
 
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(1);
@@ -4443,7 +4585,7 @@ module.exports = function (it) {
 
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.1 ToPrimitive(input [, PreferredType])
@@ -4461,7 +4603,7 @@ module.exports = function (it, S) {
 
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ (function(module, exports) {
 
 module.exports = function (bitmap, value) {
@@ -4475,17 +4617,17 @@ module.exports = function (bitmap, value) {
 
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 // 19.1.2.1 Object.assign(target, source, ...)
-var getKeys = __webpack_require__(41);
+var getKeys = __webpack_require__(40);
 var gOPS = __webpack_require__(51);
 var pIE = __webpack_require__(52);
 var toObject = __webpack_require__(53);
-var IObject = __webpack_require__(7);
+var IObject = __webpack_require__(6);
 var $assign = Object.assign;
 
 // should work with symbols and should have deterministic property order (V8 bug)
@@ -4516,11 +4658,11 @@ module.exports = !$assign || __webpack_require__(3)(function () {
 
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.14 / 15.2.3.14 Object.keys(O)
-var $keys = __webpack_require__(42);
+var $keys = __webpack_require__(41);
 var enumBugKeys = __webpack_require__(50);
 
 module.exports = Object.keys || function keys(O) {
@@ -4529,11 +4671,11 @@ module.exports = Object.keys || function keys(O) {
 
 
 /***/ }),
-/* 42 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var has = __webpack_require__(5);
-var toIObject = __webpack_require__(6);
+var has = __webpack_require__(42);
+var toIObject = __webpack_require__(5);
 var arrayIndexOf = __webpack_require__(44)(false);
 var IE_PROTO = __webpack_require__(47)('IE_PROTO');
 
@@ -4548,6 +4690,16 @@ module.exports = function (object, names) {
     ~arrayIndexOf(result, key) || result.push(key);
   }
   return result;
+};
+
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports) {
+
+var hasOwnProperty = {}.hasOwnProperty;
+module.exports = function (it, key) {
+  return hasOwnProperty.call(it, key);
 };
 
 
@@ -4568,7 +4720,7 @@ module.exports = function (it) {
 
 // false -> Array#indexOf
 // true  -> Array#includes
-var toIObject = __webpack_require__(6);
+var toIObject = __webpack_require__(5);
 var toLength = __webpack_require__(45);
 var toAbsoluteIndex = __webpack_require__(46);
 module.exports = function (IS_INCLUDES) {
@@ -4596,7 +4748,7 @@ module.exports = function (IS_INCLUDES) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.15 ToLength
-var toInteger = __webpack_require__(9);
+var toInteger = __webpack_require__(8);
 var min = Math.min;
 module.exports = function (it) {
   return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
@@ -4607,7 +4759,7 @@ module.exports = function (it) {
 /* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var toInteger = __webpack_require__(9);
+var toInteger = __webpack_require__(8);
 var max = Math.max;
 var min = Math.min;
 module.exports = function (index, length) {
@@ -4679,7 +4831,7 @@ exports.f = {}.propertyIsEnumerable;
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.13 ToObject(argument)
-var defined = __webpack_require__(8);
+var defined = __webpack_require__(7);
 module.exports = function (it) {
   return Object(defined(it));
 };
