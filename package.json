@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "can-ndjson-stream": "^0.1.7",
-    "cms-client-api": "github:thurt/cms-client-api",
+    "cms-client-api": "github:thurt/cms-client-api#4c4b5",
     "debounce": "^1.1.0",
     "storage-manager": "github:thurt/storage-manager",
     "view-model": "github:thurt/view-model"
