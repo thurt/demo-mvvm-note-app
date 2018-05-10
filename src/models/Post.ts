@@ -51,11 +51,11 @@ export default async function Note(
     function(id: number, p: CmsUpdatePostRequest) {
       app.run(myName, async function() {
         try {
-          await posts.updatePost(
+          await posts.updateUnpublishedPost(
             {id, body: p},
             {headers: {Authorization: 'Bearer ' + accessToken}},
           );
-          const pu = await posts.getPost(
+          const pu = await posts.getUnpublishedPost(
             {id},
             {headers: {Authorization: 'Bearer ' + accessToken}},
           );
@@ -77,7 +77,7 @@ export default async function Note(
           {body: {}},
           {headers: {Authorization: 'Bearer ' + accessToken}},
         );
-        const p = await posts.getPost(
+        const p = await posts.getUnpublishedPost(
           {id: res.id},
           {headers: {Authorization: 'Bearer ' + accessToken}},
         );
@@ -178,7 +178,7 @@ export default async function Note(
       throw 'state.authUser.accessToken must exist';
     }
     await streamRequest(
-      basePath + '/posts?includeUnPublished=true',
+      basePath + '/unpublished-posts',
       (pc: PostChunk) => {
         const p = pc.result;
         fillUndefined(p);

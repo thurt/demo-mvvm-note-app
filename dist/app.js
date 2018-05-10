@@ -519,8 +519,8 @@ function Note(app, errorHandler) {
             app.run(myName, function () {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
-                        yield api_1.posts.updatePost({ id, body: p }, { headers: { Authorization: 'Bearer ' + accessToken } });
-                        const pu = yield api_1.posts.getPost({ id }, { headers: { Authorization: 'Bearer ' + accessToken } });
+                        yield api_1.posts.updateUnpublishedPost({ id, body: p }, { headers: { Authorization: 'Bearer ' + accessToken } });
+                        const pu = yield api_1.posts.getUnpublishedPost({ id }, { headers: { Authorization: 'Bearer ' + accessToken } });
                         POSTS[id].lastEdited = pu.lastEdited;
                         this.emit('update_modified', id);
                     }
@@ -535,7 +535,7 @@ function Note(app, errorHandler) {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
                         const res = yield api_1.posts.createPost({ body: {} }, { headers: { Authorization: 'Bearer ' + accessToken } });
-                        const p = yield api_1.posts.getPost({ id: res.id }, { headers: { Authorization: 'Bearer ' + accessToken } });
+                        const p = yield api_1.posts.getUnpublishedPost({ id: res.id }, { headers: { Authorization: 'Bearer ' + accessToken } });
                         fillUndefined(p);
                         POSTS[p.id] = p;
                         this.emit('new', p.id);
@@ -612,7 +612,7 @@ function Note(app, errorHandler) {
             if (!accessToken) {
                 throw 'state.authUser.accessToken must exist';
             }
-            yield api_1.streamRequest(api_1.basePath + '/posts?includeUnPublished=true', (pc) => {
+            yield api_1.streamRequest(api_1.basePath + '/unpublished-posts', (pc) => {
                 const p = pc.result;
                 fillUndefined(p);
                 POSTS[p.id] = p;
@@ -1481,6 +1481,38 @@ exports.PostsApiFetchParamCreator = {
             options: fetchOptions,
         };
     },
+    /**
+     *
+     * @summary Update a unpublished post
+     * @param id
+     * @param body
+     */
+    updateUnpublishedPost: function (params, options) {
+        // verify required parameter "id" is set
+        if (params["id"] == null) {
+            throw new Error("Missing required parameter id when calling updateUnpublishedPost");
+        }
+        // verify required parameter "body" is set
+        if (params["body"] == null) {
+            throw new Error("Missing required parameter body when calling updateUnpublishedPost");
+        }
+        var baseUrl = "/unpublished-posts/{id}"
+            .replace("{" + "id" + "}", "" + params["id"]);
+        var urlObj = url.parse(baseUrl, true);
+        var fetchOptions = assign({}, { method: "PUT" }, options);
+        var contentTypeHeader = {};
+        contentTypeHeader = { "Content-Type": "application/json" };
+        if (params["body"]) {
+            fetchOptions.body = JSON.stringify(params["body"] || {});
+        }
+        if (contentTypeHeader) {
+            fetchOptions.headers = assign({}, contentTypeHeader, fetchOptions.headers);
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
 };
 /**
  * PostsApi - functional programming interface
@@ -1685,6 +1717,27 @@ exports.PostsApiFp = {
             });
         };
     },
+    /**
+     *
+     * @summary Update a unpublished post
+     * @param id
+     * @param body
+     */
+    updateUnpublishedPost: function (params, options) {
+        var fetchArgs = exports.PostsApiFetchParamCreator.updateUnpublishedPost(params, options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
 };
 /**
  * PostsApi - object-oriented interface
@@ -1773,6 +1826,15 @@ var PostsApi = (function (_super) {
     PostsApi.prototype.updatePost = function (params, options) {
         return exports.PostsApiFp.updatePost(params, options)(this.fetch, this.basePath);
     };
+    /**
+     *
+     * @summary Update a unpublished post
+     * @param id
+     * @param body
+     */
+    PostsApi.prototype.updateUnpublishedPost = function (params, options) {
+        return exports.PostsApiFp.updateUnpublishedPost(params, options)(this.fetch, this.basePath);
+    };
     return PostsApi;
 }(BaseAPI));
 exports.PostsApi = PostsApi;
@@ -1860,6 +1922,15 @@ exports.PostsApiFactory = function (fetch, basePath) {
          */
         updatePost: function (params, options) {
             return exports.PostsApiFp.updatePost(params, options)(fetch, basePath);
+        },
+        /**
+         *
+         * @summary Update a unpublished post
+         * @param id
+         * @param body
+         */
+        updateUnpublishedPost: function (params, options) {
+            return exports.PostsApiFp.updateUnpublishedPost(params, options)(fetch, basePath);
         },
     };
 };
