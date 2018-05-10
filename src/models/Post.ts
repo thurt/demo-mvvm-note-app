@@ -39,7 +39,7 @@ function fillUndefined(p: CmsPost): void {
   }
 }
 
-export default async function Note(
+export default async function(
   app: ViewModel.Interface,
   errorHandler: (e: Error | Response) => void,
 ): Promise<string> {
