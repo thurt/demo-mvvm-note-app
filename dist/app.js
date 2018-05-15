@@ -510,16 +510,19 @@ function fillUndefined(p) {
         p.content = '';
     }
 }
-function Note(app, errorHandler) {
+function default_1(app, errorHandler) {
     return __awaiter(this, void 0, void 0, function* () {
         const myName = 'Post';
         const POSTS = {};
         let accessToken;
-        const updatePost = debounce(function (id, p) {
+        const updatePost = debounce(function (id, p, publishChanges) {
             app.run(myName, function () {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
                         yield api_1.posts.updateUnpublishedPost({ id, body: p }, { headers: { Authorization: 'Bearer ' + accessToken } });
+                        if (publishChanges) {
+                            yield api_1.posts.updatePost({ id, body: p }, { headers: { Authorization: 'Bearer ' + accessToken } });
+                        }
                         const pu = yield api_1.posts.getUnpublishedPost({ id }, { headers: { Authorization: 'Bearer ' + accessToken } });
                         POSTS[id].lastEdited = pu.lastEdited;
                         this.emit('update_modified', id);
@@ -564,6 +567,7 @@ function Note(app, errorHandler) {
             },
             update(id, obj) {
                 let changed = false;
+                let publishChanges = false;
                 const p = POSTS[id];
                 if (p === undefined)
                     return console.warn(this.name, 'id', id, 'does not exist');
@@ -576,14 +580,19 @@ function Note(app, errorHandler) {
                         continue;
                     }
                     if (pp !== obj[prop]) {
-                        //@ts-ignore
-                        p[cp] = obj[prop];
-                        this.emit('update_' + prop, id);
+                        if (prop === 'lastPublished') {
+                            publishChanges = true;
+                        }
+                        else {
+                            //@ts-ignore
+                            p[cp] = obj[prop];
+                            this.emit('update_' + prop, id);
+                        }
                         changed = true;
                     }
                 }
                 if (changed) {
-                    updatePost(id, p);
+                    updatePost(id, p, publishChanges);
                 }
             },
             delete(id) {
@@ -624,7 +633,7 @@ function Note(app, errorHandler) {
         return myName;
     });
 }
-exports.default = Note;
+exports.default = default_1;
 
 
 /***/ }),
@@ -5136,6 +5145,12 @@ function Detail(myName, myModel, app, simpleMDE) {
             }
         }, e.target);
     }, true);
+    myView.querySelector('[data-name="publish-changes"]').addEventListener('click', function (e) {
+        e.stopPropagation();
+        app.run(myModel, function (el) {
+            this.update(myKey, { lastPublished: Date.now() });
+        }, e.target);
+    }, true);
     simpleMDE.codemirror.on('change', function () {
         app.run(myModel, function () {
             this.update(myKey, { body: simpleMDE.value(undefined) });
@@ -5160,6 +5175,16 @@ function Detail(myName, myModel, app, simpleMDE) {
             myData['published'].disabled = false;
         }
     }
+    function setPublishChangesState(lastEdited, lastPublished) {
+        let lastEditedDate = new Date(lastEdited);
+        let lastPublishedDate = new Date(lastPublished);
+        if (lastEdited <= lastPublished) {
+            myData['publish-changes'].disabled = true;
+        }
+        else {
+            myData['publish-changes'].disabled = false;
+        }
+    }
     app.add(myModel, {
         update_modified(key) {
             if (myKey !== key)
@@ -5167,6 +5192,7 @@ function Detail(myName, myModel, app, simpleMDE) {
             myData['modified'].textContent =
                 'Modified: ' + this.get(myKey, 'modified');
             setPublishedDisabledState(this.get(myKey, 'title'));
+            setPublishChangesState(this.get(myKey, 'lastEdited'), this.get(myKey, 'lastPublished'));
         },
         [myName + 'set'](key) {
             clearSelections();
@@ -5185,6 +5211,9 @@ function Detail(myName, myModel, app, simpleMDE) {
                 else if (name === 'published') {
                     myData[name].checked = value;
                     setPublishedDisabledState(this.get(myKey, 'title'));
+                }
+                else if (name === 'publish-changes') {
+                    setPublishChangesState(this.get(myKey, 'lastEdited'), this.get(myKey, 'lastPublished'));
                 }
                 else if (name === 'title') {
                     myData[name].innerHTML = value;

@@ -54,6 +54,20 @@ export default function Detail(
     },
     true,
   );
+  myView.querySelector('[data-name="publish-changes"]').addEventListener(
+    'click',
+    function(e: Event) {
+      e.stopPropagation();
+      app.run(
+        myModel,
+        function(el) {
+          this.update(myKey, {lastPublished: Date.now()});
+        },
+        e.target,
+      );
+    },
+    true,
+  );
   simpleMDE.codemirror.on('change', function() {
     app.run(myModel, function() {
       this.update(myKey, {body: simpleMDE.value(undefined)});
@@ -81,12 +95,30 @@ export default function Detail(
       myData['published'].disabled = false;
     }
   }
+
+  function setPublishChangesState(
+    lastEdited: string,
+    lastPublished: string,
+  ): void {
+    let lastEditedDate = new Date(lastEdited);
+    let lastPublishedDate = new Date(lastPublished);
+    if (lastEdited <= lastPublished) {
+      myData['publish-changes'].disabled = true;
+    } else {
+      myData['publish-changes'].disabled = false;
+    }
+  }
+
   app.add(myModel, {
     update_modified(key) {
       if (myKey !== key) return;
       myData['modified'].textContent =
         'Modified: ' + this.get(myKey, 'modified');
       setPublishedDisabledState(this.get(myKey, 'title'));
+      setPublishChangesState(
+        this.get(myKey, 'lastEdited'),
+        this.get(myKey, 'lastPublished'),
+      );
     },
     [myName + 'set'](key) {
       clearSelections();
@@ -104,6 +136,11 @@ export default function Detail(
         } else if (name === 'published') {
           myData[name].checked = value;
           setPublishedDisabledState(this.get(myKey, 'title'));
+        } else if (name === 'publish-changes') {
+          setPublishChangesState(
+            this.get(myKey, 'lastEdited'),
+            this.get(myKey, 'lastPublished'),
+          );
         } else if (name === 'title') {
           myData[name].innerHTML = value;
         } else if (name === 'body') {

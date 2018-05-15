@@ -48,13 +48,19 @@ export default async function(
   let accessToken: string;
 
   const updatePost = debounce(
-    function(id: number, p: CmsUpdatePostRequest) {
+    function(id: number, p: CmsUpdatePostRequest, publishChanges: boolean) {
       app.run(myName, async function() {
         try {
           await posts.updateUnpublishedPost(
             {id, body: p},
             {headers: {Authorization: 'Bearer ' + accessToken}},
           );
+          if (publishChanges) {
+            await posts.updatePost(
+              {id, body: p},
+              {headers: {Authorization: 'Bearer ' + accessToken}},
+            );
+          }
           const pu = await posts.getUnpublishedPost(
             {id},
             {headers: {Authorization: 'Bearer ' + accessToken}},
@@ -122,6 +128,7 @@ export default async function(
     },
     update(id: number, obj: {[p: string]: any}) {
       let changed = false;
+      let publishChanges = false;
       const p = POSTS[id];
       if (p === undefined)
         return console.warn(this.name, 'id', id, 'does not exist');
@@ -141,14 +148,18 @@ export default async function(
           continue;
         }
         if (pp !== obj[prop]) {
-          //@ts-ignore
-          p[cp] = obj[prop];
-          this.emit('update_' + prop, id);
+          if (prop === 'lastPublished') {
+            publishChanges = true;
+          } else {
+            //@ts-ignore
+            p[cp] = obj[prop];
+            this.emit('update_' + prop, id);
+          }
           changed = true;
         }
       }
       if (changed) {
-        updatePost(id, p);
+        updatePost(id, p, publishChanges);
       }
     },
     async delete(id) {
